@@ -60,3 +60,16 @@ git checkout -b "题目名称"  # 在最新main分支的基础上创建分支
 ```
 
 随后向本仓库提交[Pull Request](https://docs.github.com/en/pull-requests/reference/pull-requests)
+
+
+## 镜像构建说明
+
+### 版本
+
+题目与底层的libc无关时，建议使用alpine版本的镜像作为运行时环境
+
+### 动态flag
+
+本次采用[ret2shell](https://github.com/ret2shell/ret2shell)平台，
+
+容器动态flag会自动输出到`FLAG`环境变量中
