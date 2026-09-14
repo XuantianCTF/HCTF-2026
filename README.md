@@ -38,7 +38,6 @@ web_ez_sqli/
 ├── src/                         # 【私密/内部】题目原始代码与构建依赖
 │   ├── html/
 │   │   └── index.php
-│   ├── flag.sh                  # 动态 Flag 生成脚本
 │   └── Dockerfile               # 实际用于部署生产环境的 Dockerfile
 │
 ├── writeup/                     # 【私密】解题思路与 Payload
@@ -72,4 +71,6 @@ git checkout -b "题目名称"  # 在最新main分支的基础上创建分支
 
 本次采用[ret2shell](https://github.com/ret2shell/ret2shell)平台，
 
-容器动态flag会自动输出到`FLAG`环境变量中
+**容器动态flag会自动输出到`FLAG`环境变量中**
+
+所以在出题时请注意，或在**ret2shell**平台进行特殊配置
