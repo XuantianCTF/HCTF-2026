@@ -1,0 +1,137 @@
+name: PR Check
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: pr-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      has: ${{ steps.detect.outputs.has }}
+      matrix: ${{ steps.detect.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed challenges
+        id: detect
+        shell: bash
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+
+          CHANGED="$(git diff --name-only "origin/${BASE_REF}...HEAD" || true)"
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          DIRS="$(
+            printf '%s\n' "$CHANGED" \
+              | awk -F/ 'NF>=3 && ($1=="web"||$1=="pwn"||$1=="crypto"||$1=="misc") {print $1"/"$2}' \
+              | sort -u
+          )"
+
+          if [ -z "$DIRS" ]; then
+            echo "has=false" >> "$GITHUB_OUTPUT"
+            echo "matrix=[]" >> "$GITHUB_OUTPUT"
+            echo "No challenge changes detected"
+            exit 0
+          fi
+
+          matrix="[]"
+          while IFS= read -r d; do
+            [ -z "$d" ] && continue
+            matrix="$(echo "$matrix" | jq -c --arg d "$d" '. + [{dir:$d}]')"
+          done <<< "$DIRS"
+
+          echo "Affected challenges: $matrix"
+          echo "has=true" >> "$GITHUB_OUTPUT"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  validate:
+    needs: detect
+    if: needs.detect.outputs.has == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate challenge layout
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          c="${{ matrix.dir }}"
+          cat="${c%%/*}"
+          fail=0
+
+          case "$cat" in
+            web|pwn|crypto|misc) ;;
+            *) echo "::error::$c: unknown category '$cat'"; fail=1 ;;
+          esac
+
+          if [ ! -f "$c/README.md" ]; then
+            echo "::error::$c: missing README.md"
+            fail=1
+          fi
+
+          if [ ! -f "$c/src/Dockerfile" ]; then
+            echo "::error::$c: missing src/Dockerfile (deployment build)"
+            fail=1
+          fi
+
+          [ -f "$c/attachment/Dockerfile" ] || echo "::warning::$c: missing attachment/Dockerfile (public build, optional)"
+
+          [ -d "$c/writeup" ] || echo "::warning::$c: missing writeup/"
+          [ -f "$c/writeup/README.md" ] || echo "::warning::$c: missing writeup/README.md"
+
+          if [ -d "$c/src" ] && ! grep -rq 'FLAG' "$c/src"; then
+            echo "::warning::$c/src: does not reference FLAG env (dynamic flag)"
+          fi
+
+          exit "$fail"
+
+  build:
+    needs: [detect, validate]
+    if: needs.detect.outputs.has == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build src image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.dir }}/src
+          file: ${{ matrix.dir }}/src/Dockerfile
+          push: false
+          cache-from: type=gha,scope=pr-${{ matrix.dir }}-src
+          cache-to: type=gha,mode=max,scope=pr-${{ matrix.dir }}-src
+
+      - name: Build attachment image
+        if: ${{ hashFiles(format('{0}/attachment/Dockerfile', matrix.dir)) != '' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.dir }}/attachment
+          file: ${{ matrix.dir }}/attachment/Dockerfile
+          push: false
+          cache-from: type=gha,scope=pr-${{ matrix.dir }}-attachment
+          cache-to: type=gha,mode=max,scope=pr-${{ matrix.dir }}-attachment

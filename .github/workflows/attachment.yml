@@ -1,0 +1,131 @@
+name: Publish Attachments
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: attachment-release-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.detect.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed attachments
+        id: detect
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] || [ -z "$BEFORE" ] || [[ "$BEFORE" =~ ^0+$ ]]; then
+            CHANGED="$(git ls-files)"
+          else
+            CHANGED="$(git diff --name-only "$BEFORE" "$SHA")"
+          fi
+
+          mapfile -t DOCKERFILES < <(git ls-files | grep -E '(^|/)attachment/Dockerfile$' || true)
+
+          matrix="[]"
+          for df in "${DOCKERFILES[@]}"; do
+            [ -z "$df" ] && continue
+            dir="$(dirname "$df")"
+            challenge="$(dirname "$dir")"
+            affected=false
+            while IFS= read -r f; do
+              [ -z "$f" ] && continue
+              if [ "$f" = "$df" ] || [[ "$f" == "$dir/"* ]]; then
+                affected=true
+                break
+              fi
+            done <<< "$CHANGED"
+
+            if [ "$affected" = true ]; then
+              name="$(echo "$challenge" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')"
+              matrix="$(echo "$matrix" | jq -c --arg ctx "$dir" --arg name "$name" \
+                '. + [{context:$ctx, name:$name}]')"
+            fi
+          done
+
+          echo "Affected attachments: $matrix"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: detect
+    if: needs.detect.outputs.matrix != '[]' && needs.detect.outputs.matrix != ''
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build attachment binary
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ctx="${{ matrix.context }}"
+          name="${{ matrix.name }}"
+          image="attachment-builder-${name}"
+
+          docker build --target builder -t "$image" -f "$ctx/Dockerfile" "$ctx"
+
+          container="$(docker create "$image")"
+          mkdir -p "dist/${name}"
+          cp -a "$ctx/." "dist/${name}/"
+          docker cp "$container:/build/." "dist/${name}/"
+          docker rm "$container"
+
+          chmod +x "dist/${name}/vuln" 2>/dev/null || true
+          file "dist/${name}/vuln" 2>/dev/null || true
+          ls -la "dist/${name}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: dist/${{ matrix.name }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download built attachments
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Package archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          for d in dist/*/; do
+            name="$(basename "$d")"
+            (cd "$d" && zip -r "../../release/${name}.zip" .)
+          done
+          ls -lh release
+
+      - name: Publish to fixed release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: attachments
+          name: Challenge Attachments
+          make_latest: "false"
+          overwrite_files: true
+          files: release/*.zip
