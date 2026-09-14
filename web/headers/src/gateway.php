@@ -1,6 +1,6 @@
 <?php
 
-$flag = getenv('GZCTF_FLAG');
+$flag = getenv('FLAG');
 if ($flag === false || $flag === '') {
     $flag = 'flag{headers_are_more_useful_than_you_think}';
 }
