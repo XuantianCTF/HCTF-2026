@@ -39,7 +39,7 @@ jobs:
             CHANGED="$(git diff --name-only "$BEFORE" "$SHA")"
           fi
 
-          mapfile -t DOCKERFILES < <(git ls-files | grep -E '(^|/)Dockerfile$' || true)
+          mapfile -t DOCKERFILES < <(git ls-files | grep -E '(^|/)Dockerfile$' | grep -vE '(^|/)attachment/Dockerfile$' || true)
 
           matrix="[]"
           for df in "${DOCKERFILES[@]}"; do

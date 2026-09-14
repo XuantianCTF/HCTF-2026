@@ -87,13 +87,27 @@ jobs:
           docker build --target builder -t "$image" -f "$ctx/Dockerfile" "$ctx"
 
           container="$(docker create "$image")"
-          mkdir -p "dist/${name}"
-          cp -a "$ctx/." "dist/${name}/"
-          docker cp "$container:/build/." "dist/${name}/"
+          tmp="$(mktemp -d)"
+          docker cp "$container:/build/." "$tmp/"
           docker rm "$container"
 
-          chmod +x "dist/${name}/vuln" 2>/dev/null || true
-          file "dist/${name}/vuln" 2>/dev/null || true
+          mkdir -p "dist/${name}"
+          found=0
+          while IFS= read -r -d '' f; do
+            if file -b "$f" | grep -q '^ELF'; then
+              cp "$f" "dist/${name}/${name}"
+              found=1
+              break
+            fi
+          done < <(find "$tmp" -type f -perm -u+x -print0)
+
+          if [ "$found" -eq 0 ]; then
+            echo "::error::no ELF binary found in builder output for ${name}"
+            exit 1
+          fi
+
+          chmod +x "dist/${name}/${name}"
+          file "dist/${name}/${name}"
           ls -la "dist/${name}"
 
       - uses: actions/upload-artifact@v4
@@ -105,21 +119,15 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download built attachments
+      - name: Download built binaries
         uses: actions/download-artifact@v4
         with:
           path: dist
+          merge-multiple: true
 
-      - name: Package archives
+      - name: Show assets
         shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p release
-          for d in dist/*/; do
-            name="$(basename "$d")"
-            (cd "$d" && zip -r "../../release/${name}.zip" .)
-          done
-          ls -lh release
+        run: ls -la dist
 
       - name: Publish to fixed release
         uses: softprops/action-gh-release@v2
@@ -128,4 +136,4 @@ jobs:
           name: Challenge Attachments
           make_latest: "false"
           overwrite_files: true
-          files: release/*.zip
+          files: dist/*
