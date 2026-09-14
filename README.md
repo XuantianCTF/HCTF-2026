@@ -49,3 +49,14 @@ web_ez_sqli/
     └── init.sql
 ```
 
+## 题目提交指南
+
+先`fork`本仓库，并clone自己fork后的仓库
+
+并在当前最新的main分支下执行
+
+```bash
+git checkout -b "题目名称"  # 在最新main分支的基础上创建分支
+```
+
+随后向本仓库提交[Pull Request](https://docs.github.com/en/pull-requests/reference/pull-requests)
