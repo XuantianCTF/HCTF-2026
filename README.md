@@ -74,3 +74,39 @@ git checkout -b "题目名称"  # 在最新main分支的基础上创建分支
 **容器动态flag会自动输出到`FLAG`环境变量中**
 
 所以在出题时请注意，或在**ret2shell**平台进行特殊配置
+
+### attachment/Dockerfile 编写规范
+
+`attachment/` 是【公开】给选手的附件目录，其中的 `Dockerfile` 既用于选手本地复现，也被 CI 用于自动构建并发布附件二进制。
+
+编写要求：
+
+1. **必须使用多阶段构建，且编译阶段命名为 `builder`**。CI 会执行 `docker build --target builder`：
+
+   ```dockerfile
+   FROM ubuntu:22.04 AS builder
+   WORKDIR /build
+   COPY vuln.c .
+   RUN gcc vuln.c -o vuln -fno-stack-protector -no-pie
+   ```
+
+2. **编译产物必须输出到 `/build` 目录**。CI 会从该阶段容器的 `/build` 中提取 ELF 可执行文件并重命名为题目名，作为 Release 附件发布；若未找到 ELF 二进制，构建直接失败。
+
+3. **运行阶段负责本地复现**，通过固定端口暴露服务（如用 `socat`）：
+
+   ```dockerfile
+   FROM ubuntu:22.04
+   RUN apt-get update \
+       && apt-get install -y --no-install-recommends socat \
+       && rm -rf /var/lib/apt/lists/*
+   WORKDIR /app
+   COPY --from=builder /build/vuln /app/vuln
+   EXPOSE 9999
+   CMD ["socat", "TCP-LISTEN:9999,reuseaddr,fork", "EXEC:/app/vuln"]
+   ```
+
+4. **统一使用 Linux/amd64 + glibc 基础镜像编译**（如 `ubuntu:22.04`），不要依赖宿主机工具链，避免本地（macOS/ARM）与线上架构不一致。
+
+5. **只放演示 flag**，不要写入真实 flag；附件会被公开发布。动态 flag 由部署镜像（`src/`）从 `FLAG` 环境变量读取。
+
+6. **附件镜像不推送到 ghcr**。CI 仅在 PR 校验与发布时构建/提取产物；需要发布部署镜像时请编写 `src/Dockerfile`。
