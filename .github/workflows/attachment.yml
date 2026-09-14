@@ -156,8 +156,8 @@ jobs:
               chmod +x "release/${name}"
             fi
 
-            gh release delete-asset attachments "$name" -y 2>/dev/null || true
-            gh release delete-asset attachments "${name}.zip" -y 2>/dev/null || true
+            gh release delete-asset attachments "$name" -R "$GITHUB_REPOSITORY" -y 2>/dev/null || true
+            gh release delete-asset attachments "${name}.zip" -R "$GITHUB_REPOSITORY" -y 2>/dev/null || true
           done
 
           ls -lh release
