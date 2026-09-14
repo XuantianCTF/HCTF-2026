@@ -92,7 +92,17 @@ git checkout -b "题目名称"  # 在最新main分支的基础上创建分支
 
 2. **编译产物必须输出到 `/build` 目录**。CI 会从该阶段容器的 `/build` 中提取 ELF 可执行文件并重命名为题目名，作为 Release 附件发布；若未找到 ELF 二进制，构建直接失败。
 
-3. **运行阶段负责本地复现**，通过固定端口暴露服务（如用 `socat`）：
+3. **如需附带动态链接器与 libc**（pwn 题常需要），在 `builder` 阶段把它们拷到 `/build/libc/`：
+
+   ```dockerfile
+   RUN mkdir -p /build/libc \
+       && cp /lib/x86_64-linux-gnu/libc.so.6 /build/libc/ \
+       && cp -L /lib64/ld-linux-x86-64.so.2 /build/libc/
+   ```
+
+   CI 检测到 `/build/libc/` 非空时，会把二进制与这些文件一起打包为 `<题目名>.zip` 发布；否则只发布原始二进制文件。libc 版本由基础镜像决定，作者可自行选择/固定。
+
+4. **运行阶段负责本地复现**，通过固定端口暴露服务（如用 `socat`）：
 
    ```dockerfile
    FROM ubuntu:22.04
@@ -105,8 +115,8 @@ git checkout -b "题目名称"  # 在最新main分支的基础上创建分支
    CMD ["socat", "TCP-LISTEN:9999,reuseaddr,fork", "EXEC:/app/vuln"]
    ```
 
-4. **统一使用 Linux/amd64 + glibc 基础镜像编译**（如 `ubuntu:22.04`），不要依赖宿主机工具链，避免本地（macOS/ARM）与线上架构不一致。
+5. **统一使用 Linux/amd64 + glibc 基础镜像编译**（如 `ubuntu:22.04`），不要依赖宿主机工具链，避免本地（macOS/ARM）与线上架构不一致。
 
-5. **只放演示 flag**，不要写入真实 flag；附件会被公开发布。动态 flag 由部署镜像（`src/`）从 `FLAG` 环境变量读取。
+6. **只放演示 flag**，不要写入真实 flag；附件会被公开发布。动态 flag 由部署镜像（`src/`）从 `FLAG` 环境变量读取。
 
-6. **附件镜像不推送到 ghcr**。CI 仅在 PR 校验与发布时构建/提取产物；需要发布部署镜像时请编写 `src/Dockerfile`。
+7. **附件镜像不推送到 ghcr**。CI 仅在 PR 校验与发布时构建/提取产物；需要发布部署镜像时请编写 `src/Dockerfile`。

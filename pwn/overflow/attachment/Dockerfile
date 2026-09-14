@@ -10,6 +10,10 @@ WORKDIR /build
 COPY vuln.c .
 RUN gcc vuln.c -o vuln -fno-stack-protector -no-pie -O0 -g
 
+RUN mkdir -p /build/libc \
+    && cp /lib/x86_64-linux-gnu/libc.so.6 /build/libc/ \
+    && cp -L /lib64/ld-linux-x86-64.so.2 /build/libc/
+
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive

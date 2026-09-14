@@ -99,7 +99,7 @@ jobs:
               found=1
               break
             fi
-          done < <(find "$tmp" -type f -perm -u+x -print0)
+          done < <(find "$tmp" -maxdepth 1 -type f -perm -u+x -print0)
 
           if [ "$found" -eq 0 ]; then
             echo "::error::no ELF binary found in builder output for ${name}"
@@ -108,6 +108,13 @@ jobs:
 
           chmod +x "dist/${name}/${name}"
           file "dist/${name}/${name}"
+
+          if [ -d "$tmp/libc" ] && [ -n "$(ls -A "$tmp/libc")" ]; then
+            mkdir -p "dist/${name}/libc"
+            cp -a "$tmp/libc/." "dist/${name}/libc/"
+            ls -la "dist/${name}/libc"
+          fi
+
           ls -la "dist/${name}"
 
       - uses: actions/upload-artifact@v4
@@ -119,15 +126,41 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download built binaries
+      - name: Download built attachments
         uses: actions/download-artifact@v4
         with:
           path: dist
-          merge-multiple: true
 
-      - name: Show assets
+      - name: Package assets
         shell: bash
-        run: ls -la dist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p release
+
+          for d in dist/*/; do
+            name="$(basename "$d")"
+
+            if [ -d "$d/libc" ] && [ -n "$(ls -A "$d/libc")" ]; then
+              stage="$(mktemp -d)"
+              cp "$d/$name" "$stage/$name"
+              cp -a "$d/libc/." "$stage/"
+              chmod +x "$stage/$name"
+              (cd "$stage" && zip -r "$GITHUB_WORKSPACE/release/${name}.zip" . >/dev/null)
+              echo "packed ${name}.zip:"
+              unzip -l "release/${name}.zip"
+            else
+              cp "$d/$name" "release/${name}"
+              chmod +x "release/${name}"
+            fi
+
+            gh release delete-asset attachments "$name" -y 2>/dev/null || true
+            gh release delete-asset attachments "${name}.zip" -y 2>/dev/null || true
+          done
+
+          ls -lh release
 
       - name: Publish to fixed release
         uses: softprops/action-gh-release@v2
@@ -136,4 +169,4 @@ jobs:
           name: Challenge Attachments
           make_latest: "false"
           overwrite_files: true
-          files: dist/*
+          files: release/*
