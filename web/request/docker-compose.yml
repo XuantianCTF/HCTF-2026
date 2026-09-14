@@ -1,0 +1,5 @@
+services:
+  impostor:
+    build: .
+    ports:
+      - "58000:5000"
