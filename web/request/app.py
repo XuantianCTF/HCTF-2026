@@ -1,8 +1,10 @@
+import os
+
 from flask import Flask, request, make_response
 
 app = Flask(__name__)
 
-FLAG = open("/flag.txt").read().strip()
+FLAG = os.environ.get("FLAG", "").strip()
 
 REQUIRED_IP = "127.0.0.1"
 REQUIRED_UA = "Mozilla/5.0 (compatible; ImpostorBot/1.0)"
