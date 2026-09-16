@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>砍价免费拿 · 仅差 1 金币</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    min-height:100vh;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    background:#1b1210;
+    display:flex; justify-content:center;
+  }
+  .phone {
+    width:100%; max-width:414px; min-height:100vh;
+    background:linear-gradient(180deg,#e8503f 0%,#e8503f 200px,#f6efe6 480px,#f2ebe0 100%);
+    position:relative;
+    box-shadow:0 0 60px rgba(0,0,0,.6);
+  }
+
+  /* ===== 顶栏 ===== */
+  .topbar { height:46px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; color:#fff; }
+  .topbar .back { font-size:26px; line-height:1; }
+  .topbar .title { font-size:17px; font-weight:600; letter-spacing:1px; }
+  .topbar .more { font-size:20px; letter-spacing:2px; font-weight:700; }
+
+  /* ===== 倒计时条 ===== */
+  .countdown-bar {
+    margin:6px 14px 0; padding:7px 12px; border-radius:8px;
+    background:rgba(0,0,0,.22); color:#ffe9c8; font-size:12px;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .countdown-bar .cd { font-weight:800; color:#fff; font-variant-numeric:tabular-nums; }
+  .countdown-bar .warn { color:#ffd54f; }
+
+  /* ===== 商品卡（孤品 flag，CSS 旗帜） ===== */
+  .product-card {
+    margin:12px 14px 0; background:#fff; border-radius:14px; padding:14px;
+    display:flex; gap:12px; box-shadow:0 4px 16px rgba(160,40,20,.10);
+  }
+  .product-img {
+    width:104px; height:104px; border-radius:10px; flex:none; position:relative;
+    background:radial-gradient(circle at 30% 25%,#fff2dd,#ffd9a0 60%,#f5b95e);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .product-img .corner {
+    position:absolute; top:0; left:0; background:#e02e24; color:#fff;
+    font-size:10px; padding:3px 8px; border-radius:10px 0 10px 0; font-weight:600; z-index:2;
+  }
+  .flag-goods { position:absolute; inset:0; }
+  .flagpole { position:absolute; left:30px; top:16px; bottom:14px; width:4px; border-radius:2px; background:linear-gradient(180deg,#cfc4b0,#9a8a76); }
+  .flagcloth {
+    position:absolute; left:32px; top:18px; width:52px; height:36px;
+    background:linear-gradient(120deg,#ff5b33,#e02e24);
+    border-radius:0 3px 3px 0;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:13px; font-weight:800; font-style:italic; letter-spacing:.5px;
+    transform-origin:left center; animation:clothwave 2.2s ease-in-out infinite;
+    box-shadow:2px 3px 8px rgba(160,40,20,.3);
+  }
+  @keyframes clothwave { 0%,100%{transform:perspective(60px) rotateY(0deg) skewY(-2deg)} 50%{transform:perspective(60px) rotateY(14deg) skewY(2deg)} }
+  .product-info { flex:1; min-width:0; display:flex; flex-direction:column; }
+  .product-name {
+    font-size:14px; font-weight:600; color:#333; line-height:1.45;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .product-desc { font-size:11px; color:#999; margin-top:3px; }
+  .price-row { margin-top:auto; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .price-origin { font-size:12px; color:#999; text-decoration:line-through; }
+  .price-now { font-size:12px; color:#e02e24; font-weight:600; }
+  .price-now b { font-size:17px; font-weight:800; font-variant-numeric:tabular-nums; }
+  .tag-row { margin-top:6px; display:flex; gap:6px; flex-wrap:wrap; }
+  .tag { font-size:10px; color:#e0654f; background:#fdeeea; border:1px solid #f7cabf; padding:2px 7px; border-radius:4px; }
+  .tag.gold { color:#8a5a00; background:#fff6df; border-color:#f0d79a; }
+
+  /* ===== 进度区 ===== */
+  .progress-card { margin:12px 14px 0; padding:0 6px; }
+  .progress-nums { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px; color:#fff; font-size:12px; }
+  .progress-nums b { font-size:17px; font-weight:800; color:#ffd54f; font-variant-numeric:tabular-nums; }
+  .progress-nums .cut-count { font-size:11px; color:#ffe9c8; }
+  .bar { position:relative; height:20px; border-radius:12px; background:rgba(255,255,255,.55); }
+  .bar-fill {
+    position:absolute; left:2px; top:2px; bottom:2px; border-radius:12px;
+    background:linear-gradient(90deg,#ff8a3d,#e02e24);
+    transition:width .6s cubic-bezier(.22,1,.36,1);
+    box-shadow:inset 0 -3px 6px rgba(0,0,0,.18);
+  }
+  .bar-fill::after {
+    content:""; position:absolute; inset:0; border-radius:12px;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.5) 50%,transparent 70%);
+    background-size:220% 100%; animation:shimmer 2.2s linear infinite;
+  }
+  @keyframes shimmer { from{background-position:200% 0} to{background-position:-60% 0} }
+  .bar-flag { position:absolute; right:2px; top:-15px; width:13px; height:9px; background:#ffd54f; border-radius:0 3px 3px 0; box-shadow:1px 1px 3px rgba(0,0,0,.2); }
+  .bar-flag::before { content:""; position:absolute; left:-3px; top:-3px; bottom:-2px; width:2px; background:#8c6a5a; border-radius:1px; }
+  .bar-tip {
+    position:absolute; right:0; top:24px; font-size:11px; color:#fff; font-weight:700;
+    background:#e02e24; padding:2px 9px; border-radius:11px; white-space:nowrap;
+    box-shadow:0 2px 6px rgba(224,46,36,.4);
+  }
+  .progress-meta { margin-top:8px; display:flex; justify-content:space-between; font-size:9px; color:rgba(255,233,200,.75); }
+  .progress-meta b { color:rgba(255,233,200,.95); }
+
+  /* ===== CSS 资产图标 ===== */
+  .ic { width:22px; height:22px; margin:0 auto; border-radius:50%; position:relative;
+    background:radial-gradient(circle at 35% 30%,#ffe9b0,#f0a818 70%,#c88000);
+    border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+  .ic::after { content:attr(data-t); position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#7a4d00; }
+  .ic-sm  { width:18px; height:18px; } .ic-sm::after { font-size:0; }
+  .ic-sm::after { content:""; position:absolute; inset:3px; border-radius:50%; background:rgba(255,255,255,.65); }
+  .ic-sq  { width:18px; height:18px; border-radius:4px; background:linear-gradient(135deg,#c8b6ff,#9a7af5); } .ic-sq::after { font-size:9px; color:#fff; }
+  .ic-tk  { width:24px; height:16px; border-radius:5px; background:linear-gradient(135deg,#ffd9a0,#f0a818); } .ic-tk::after { font-size:9px; }
+  .ic-grain { background:radial-gradient(circle at 35% 30%,#fff6df,#ffc84d 75%,#e09a20); }
+
+  /* ===== 资产面板（单位换算链） ===== */
+  .asset-card {
+    margin:16px 14px 0; background:#fff; border-radius:14px; padding:13px 14px;
+    box-shadow:0 4px 14px rgba(160,40,20,.09); position:relative;
+  }
+  .asset-head { display:flex; align-items:baseline; gap:8px; }
+  .asset-head .t { font-size:14px; font-weight:700; color:#333; }
+  .asset-head .rule { margin-left:auto; font-size:9px; color:#b08e7e; max-width:175px; text-align:right; line-height:1.5; }
+  .asset-grid { display:flex; gap:8px; margin-top:10px; position:relative; }
+  .asset-item {
+    flex:1; background:linear-gradient(180deg,#fff8ea,#fff); border:1px solid #f0d79a;
+    border-radius:10px; padding:8px 6px; text-align:center;
+  }
+  .asset-item .n { font-size:16px; font-weight:800; color:#8a5a00; font-variant-numeric:tabular-nums; margin-top:3px; }
+  .asset-item .u { font-size:9px; color:#b08e7e; }
+  .asset-btns { display:flex; gap:8px; margin-top:10px; }
+  .btn-synth {
+    flex:1; border:none; cursor:pointer; height:34px; border-radius:17px;
+    background:linear-gradient(180deg,#ffe9b0,#ffc84d 55%,#f0a818); color:#7a4d00;
+    font-size:13px; font-weight:800;
+  }
+  .btn-synth:disabled { background:#eee; color:#bbb; cursor:not-allowed; }
+  .btn-draw-entry {
+    flex:1; border:none; cursor:pointer; height:34px; border-radius:17px;
+    background:linear-gradient(180deg,#ff6a3c,#e02e24); color:#fff; font-size:13px; font-weight:800;
+    box-shadow:0 3px 8px rgba(224,46,36,.3);
+  }
+  .float-tip {
+    position:absolute; left:50%; top:-6px; transform:translateX(-50%);
+    color:#e02e24; font-size:13px; font-weight:800; pointer-events:none; white-space:nowrap;
+    animation:floatup 1.1s ease-out forwards; z-index:5;
+  }
+  @keyframes floatup { from{opacity:1; translate:0 0} to{opacity:0; translate:0 -26px} }
+
+  /* ===== 主按钮 ===== */
+  .action-card { margin:18px 14px 0; text-align:center; }
+  .btn-kan {
+    width:100%; border:none; outline:none; cursor:pointer;
+    height:56px; border-radius:30px; position:relative; overflow:hidden;
+    background:linear-gradient(180deg,#ff6a3c,#e02e24 60%,#c8161c);
+    color:#fff; font-size:20px; font-weight:800; letter-spacing:3px;
+    box-shadow:0 8px 20px rgba(224,46,36,.45), inset 0 2px 3px rgba(255,255,255,.4);
+    animation:breath 1.6s ease-in-out infinite;
+    transition:transform .1s;
+  }
+  .btn-kan:active { transform:scale(.97); }
+  .btn-kan.locked { background:linear-gradient(180deg,#c9b8a8,#a89888); box-shadow:none; animation:none; }
+  @keyframes breath { 0%,100%{transform:scale(1)} 50%{transform:scale(1.025)} }
+  .kan-left { margin-top:9px; font-size:12px; color:#8c6a5a; }
+  .kan-left b { color:#e02e24; }
+
+  /* ===== 大转盘 ===== */
+  .wheel-card { margin:12px 14px 0; background:#fff; border-radius:14px; padding:14px; box-shadow:0 2px 12px rgba(160,40,20,.06); }
+  .card-head { font-size:14px; font-weight:700; color:#333; display:flex; align-items:baseline; gap:6px; }
+  .card-head b { color:#e02e24; }
+  .card-head .head-tip { margin-left:auto; font-size:10px; font-weight:400; color:#b08e7e; }
+  .card-head .head-tip i { font-style:normal; color:#e0654f; }
+  .wheel-wrap { position:relative; width:272px; height:272px; margin:14px auto 4px; }
+  .wheel {
+    width:100%; height:100%; border-radius:50%; position:relative;
+    border:8px solid #ffd54f; overflow:hidden;
+    transition:transform 3.6s cubic-bezier(.15,.85,.25,1);
+    box-shadow:0 6px 18px rgba(160,40,20,.22), inset 0 0 0 3px #fff;
+    background:conic-gradient(
+      #fff8ea 0deg 45deg, #fff 45deg 90deg, #fff8ea 90deg 135deg, #fff 135deg 180deg,
+      #fff8ea 180deg 225deg, #fff 225deg 270deg, #ffe3d3 270deg 315deg, #ffeed6 315deg 360deg);
+  }
+  .wheel-cell { position:absolute; inset:0; }
+  .wheel-cell span {
+    position:absolute; left:50%; top:16px; transform:translateX(-50%);
+    font-size:12px; font-weight:700; color:#a05a2c; text-align:center; white-space:nowrap; line-height:1.35;
+  }
+  .wheel-cell span small { display:block; font-size:9px; color:#c08a5a; font-weight:600; }
+  .wheel-pointer {
+    position:absolute; left:50%; top:-6px; transform:translateX(-50%); z-index:3;
+    width:0; height:0; border:12px solid transparent; border-top:20px solid #e02e24;
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,.3));
+  }
+  .wheel-go {
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:4;
+    width:76px; height:76px; border-radius:50%; border:4px solid #ffd54f; cursor:pointer;
+    background:linear-gradient(180deg,#ff6a3c,#e02e24); color:#fff; font-size:17px; font-weight:800;
+    box-shadow:0 4px 12px rgba(224,46,36,.5), inset 0 2px 3px rgba(255,255,255,.35);
+    animation:breathC 1.4s ease-in-out infinite;
+  }
+  .wheel-go:disabled { animation:none; filter:grayscale(.4); }
+  @keyframes breathC { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.03)} }
+  .wheel-note { text-align:center; font-size:11px; color:#b08e7e; margin-top:6px; }
+  .wheel-note b { color:#e02e24; }
+
+  /* ===== 助力播报 ===== */
+  .broadcast {
+    margin:14px 14px 0; height:34px; border-radius:8px; overflow:hidden; position:relative;
+    background:#fff; box-shadow:0 2px 10px rgba(160,40,20,.08);
+  }
+  .bc-item {
+    position:absolute; inset:0; display:flex; align-items:center; padding:0 12px;
+    font-size:12px; color:#666; white-space:nowrap;
+  }
+  .bc-item::before { content:""; width:3px; height:14px; background:#e02e24; border-radius:2px; margin-right:8px; flex:none; }
+  .bc-item b { color:#e02e24; margin:0 3px; }
+  .bc-item.slide { animation:bcin .45s ease-out; }
+  @keyframes bcin { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+
+  /* ===== 白卡通用 ===== */
+  .card { margin:12px 14px 0; background:#fff; border-radius:14px; padding:14px; box-shadow:0 2px 12px rgba(160,40,20,.06); }
+
+  /* 排行榜 */
+  .rank-list { list-style:none; margin-top:10px; }
+  .rank-list li { display:flex; align-items:center; gap:9px; padding:7px 6px; border-radius:10px; }
+  .rank-list li.me {
+    background:linear-gradient(90deg,#fff6df,#fffdf7); border:1px solid #f0d79a;
+    box-shadow:0 2px 10px rgba(240,168,24,.18);
+  }
+  .rank-no { width:20px; text-align:center; font-size:15px; font-weight:800; font-style:italic; color:#c9b8a8; flex:none; }
+  .rank-no.top { color:#e8a23c; font-size:17px; }
+  .avatar { width:38px; height:38px; border-radius:50%; flex:none; color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; }
+  .rank-name { font-size:13px; color:#333; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .rank-sub { font-size:10px; color:#bbb; margin-top:2px; }
+  .rank-status { margin-left:auto; text-align:right; flex:none; font-size:12px; font-weight:800; }
+  .rank-status.ok { color:#07c160; }
+  .rank-status.near { color:#e02e24; }
+  .rank-status.far { color:#c9b8a8; font-weight:600; }
+  .tag-solved { font-size:9px; color:#07c160; border:1px solid rgba(7,193,96,.25); background:rgba(7,193,96,.08); border-radius:3px; padding:1px 4px; }
+  .tag-lucky { font-size:9px; color:#fff; background:linear-gradient(90deg,#ff9a3d,#e02e24); border-radius:3px; padding:1px 4px; }
+  .rank-me-tip { margin-top:10px; padding:7px 10px; background:#fff6df; border-radius:8px; font-size:11px; color:#8a5a00; text-align:center; }
+  .rank-me-tip b, .rank-me-tip i { color:#e02e24; font-style:normal; }
+
+  /* 好友助力 */
+  .helper-list { list-style:none; margin-top:10px; }
+  .helper-list li { display:flex; align-items:center; gap:10px; padding:7px 0; }
+  .helper-name { font-size:13px; color:#333; display:flex; align-items:center; gap:5px; }
+  .badge-new { font-size:9px; color:#fff; background:#ff6a3c; border-radius:3px; padding:1px 4px; }
+  .helper-sub { font-size:10px; color:#bbb; margin-top:2px; }
+  .helper-cut { margin-left:auto; font-size:13px; color:#e02e24; font-weight:800; }
+
+  /* 分享矩阵（单字圆钮） */
+  .share-grid { display:flex; justify-content:space-around; margin-top:14px; }
+  .share-item { text-align:center; cursor:pointer; }
+  .share-item .ico {
+    width:52px; height:52px; border-radius:50%; margin:0 auto 6px;
+    display:flex; align-items:center; justify-content:center; color:#fff;
+    font-size:18px; font-weight:800; box-shadow:0 4px 10px rgba(0,0,0,.12);
+  }
+  .share-item span { font-size:11px; color:#666; }
+  .share-note { margin-top:12px; text-align:center; font-size:11px; color:#b08e7e; line-height:1.7; }
+  .share-note b { color:#e02e24; }
+
+  /* 免费拿按钮 */
+  .withdraw-card { margin:16px 14px 0; text-align:center; }
+  .btn-get {
+    width:100%; border:none; outline:none; cursor:pointer; height:52px; border-radius:26px;
+    background:linear-gradient(180deg,#ffe9b0,#ffc84d 55%,#f0a818);
+    color:#7a4d00; font-size:18px; font-weight:800; letter-spacing:2px;
+    box-shadow:0 6px 16px rgba(240,168,24,.4), inset 0 2px 3px rgba(255,255,255,.7);
+  }
+  .btn-get:active { transform:scale(.98); }
+  .withdraw-note { margin-top:8px; font-size:12px; color:#8c6a5a; }
+  .withdraw-note b { color:#e02e24; }
+
+  /* 底部 */
+  .foot { margin:26px 0 30px; text-align:center; }
+  .foot-links { font-size:11px; color:#b09a8a; }
+  .foot-links span { cursor:pointer; margin:0 6px; }
+  .giveup { margin-top:12px; font-size:10px; color:#d8c9bc; cursor:pointer; user-select:none; text-decoration:underline dotted; }
+  .giveup:active { color:#e02e24; }
+
+  /* ===== 弹窗通用 ===== */
+  .mask { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:50; display:none; align-items:center; justify-content:center; padding:28px; }
+  .mask.show { display:flex; }
+  .mask.z-auto { z-index:55; }
+  .mask.z-top { z-index:75; }
+  .modal { width:100%; max-width:330px; background:#fff; border-radius:18px; overflow:hidden; animation:pop .35s cubic-bezier(.2,1.4,.4,1); position:relative; }
+  @keyframes pop { from{transform:scale(.6);opacity:0} to{transform:scale(1);opacity:1} }
+  .modal-red { background:linear-gradient(180deg,#ff5b33,#e02e24); color:#fff; text-align:center; padding:24px 20px 18px; position:relative; overflow:hidden; }
+  .modal-red h3 { font-size:20px; font-weight:800; letter-spacing:1px; }
+  .modal-red .amount { font-size:36px; font-weight:900; color:#ffd54f; margin:8px 0 2px; font-variant-numeric:tabular-nums; }
+  .modal-red .sub { font-size:12px; color:#ffe9c8; line-height:1.6; }
+  .modal-red .sub b { color:#ffd54f; }
+  .modal-red .coins { position:absolute; inset:0; pointer-events:none; }
+  .coin-elm {
+    position:absolute; bottom:10px; width:15px; height:15px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#ffe9b0,#f0a818 75%,#c88000);
+    border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.25);
+    animation:rise 1.3s ease-out forwards;
+  }
+  @keyframes rise { from{transform:translateY(0) rotate(0);opacity:1} to{transform:translateY(-140px) rotate(40deg);opacity:0} }
+  .modal-body { padding:16px 20px 20px; }
+  .modal-btn { display:block; width:100%; border:none; cursor:pointer; height:46px; border-radius:24px; background:linear-gradient(180deg,#ff6a3c,#e02e24); color:#fff; font-size:17px; font-weight:800; box-shadow:0 6px 14px rgba(224,46,36,.35); }
+  .modal-btn:active { transform:scale(.98); }
+  .modal-btn:disabled { filter:grayscale(.5); }
+  .modal-hint { text-align:center; font-size:11px; color:#b08e7e; margin-top:10px; }
+  .modal-hint b { color:#e02e24; }
+  .close-x {
+    position:absolute; top:8px; right:8px; width:26px; height:26px; border-radius:50%;
+    background:rgba(0,0,0,.35); color:#fff; font-size:14px; line-height:26px; text-align:center;
+    cursor:pointer; opacity:0; z-index:9;
+  }
+  .close-x.show { animation:xfade .3s ease forwards; }
+  @keyframes xfade { to{opacity:1} }
+  .gain-list { text-align:center; font-size:13px; color:#555; line-height:2; }
+  .gain-list b { color:#e02e24; }
+
+  /* 挽留弹窗 */
+  .retain-title { font-size:18px; font-weight:800; color:#333; text-align:center; margin-bottom:12px; }
+  .retain-text { font-size:14px; color:#555; line-height:1.8; text-align:center; }
+  .retain-text b { color:#e02e24; }
+  .retain-btns { margin-top:18px; display:flex; flex-direction:column; gap:10px; }
+  .btn-ghost { height:42px; border-radius:21px; border:none; background:#f0e9e0; color:#a89888; font-size:14px; cursor:pointer; }
+  .btn-lucky { background:linear-gradient(90deg,#ff9a3d,#e02e24); color:#fff; font-weight:800; font-size:16px; height:46px; border-radius:23px; border:none; cursor:pointer; box-shadow:0 6px 14px rgba(224,46,36,.35); }
+
+  /* 红包雨（CSS 红包 / 金片 / 金粒） */
+  .rain-layer { position:fixed; inset:0; display:none; z-index:60; }
+  .rain-layer.show { display:block; }
+  .rain-item { position:absolute; top:-46px; cursor:pointer; user-select:none; animation:fall linear forwards; will-change:transform; }
+  .rain-item:active { transform:scale(1.35); }
+  @keyframes fall { to { transform:translateY(115vh) rotate(40deg); } }
+  .rain-hb { width:30px; height:38px; border-radius:5px; background:linear-gradient(180deg,#ff5b33,#e02e24); position:relative; box-shadow:0 2px 6px rgba(0,0,0,.25); }
+  .rain-hb::after { content:"福"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#ffd54f; font-size:14px; font-weight:800; }
+  .rain-coin { width:26px; height:26px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#ffe9b0,#f0a818 75%,#c88000); border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.25); }
+  .rain-grain { width:13px; height:13px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff6df,#ffc84d); box-shadow:0 1px 3px rgba(0,0,0,.15); }
+  .rain-count {
+    position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:61;
+    background:rgba(0,0,0,.6); color:#ffd54f; font-size:13px; font-weight:800;
+    padding:6px 16px; border-radius:18px; display:none;
+  }
+  .rain-count.show { display:block; }
+
+  /* 广告占位 */
+  .ad-box { background:#16120f; height:96px; border-radius:10px; margin:14px 0; display:flex; align-items:center; justify-content:center; color:#8c7a6a; font-size:12px; }
+
+  /* 终局黑幕 */
+  .gameover { position:fixed; inset:0; background:#141110; z-index:99; display:none; flex-direction:column; align-items:center; justify-content:center; color:#7a6a5a; gap:10px; }
+  .gameover.show { display:flex; }
+  .gameover .big { font-size:20px; color:#c9b8a8; font-weight:700; }
+  .gameover .small { font-size:12px; }
+  .btn-again {
+    margin-top:24px; border:none; cursor:pointer; height:46px; padding:0 36px; border-radius:24px;
+    background:linear-gradient(180deg,#ff6a3c,#e02e24); color:#fff; font-size:16px; font-weight:700;
+    box-shadow:0 6px 18px rgba(224,46,36,.4);
+  }
+  .btn-again:active { transform:scale(.97); }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <header class="topbar">
+    <span class="back">‹</span>
+    <span class="title">砍价免费拿</span>
+    <span class="more">···</span>
+  </header>
+
+  <div class="countdown-bar">
+    <span>距活动结束</span><span class="cd" id="countdown">02:59:59</span><span class="warn">后已砍金额全部清零</span>
+  </div>
+
+  <section class="product-card">
+    <div class="product-img">
+      <span class="corner">孤品</span>
+      <div class="flag-goods"><div class="flagpole"></div><div class="flagcloth">flag</div></div>
+    </div>
+    <div class="product-info">
+      <div class="product-name">【今日孤品】flag · 全新未拆 · 成色 99+ · 砍至 0 元包邮到家</div>
+      <div class="product-desc">商品描述：flag</div>
+      <div class="price-row">
+        <span class="price-origin">¥199.00</span>
+        <span class="price-now">已砍至 <b id="remaining">0.0120</b> 元</span>
+      </div>
+      <div class="tag-row">
+        <span class="tag">新人首刀可砍 10-87 元</span>
+        <span class="tag gold" id="watchCnt">1,024 人围观此孤品</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="progress-card">
+    <div class="progress-nums">
+      <span>已砍 <b id="cutTotal">198.9880</b> 元</span>
+      <span class="cut-count">第 <b id="cutNo">43</b> 刀 · 已超越全国 <b id="rank">99.3%</b> 的用户</span>
+    </div>
+    <div class="bar">
+      <div class="bar-fill" id="barFill"></div>
+      <div class="bar-flag"></div>
+      <div class="bar-tip" id="barTip">仅差 1.2 金币</div>
+    </div>
+    <div class="progress-meta"><span>砍价单号 <b id="orderId">#3487</b></span><span id="exactProg">精确进度 99.9939417%（显示值已四舍五入）</span></div>
+  </section>
+
+  <!-- 资产面板：金币 → 金粒 → 兑换券碎片 换算链 -->
+  <section class="asset-card" id="assetCard">
+    <div class="asset-head">
+      <span class="t">我的资产</span>
+      <span class="rule">100 金粒=1 金币｜1 金币=0.01 元自动抵扣<br>100 碎片=1 兑换券=10 金粒（合成手续费 10%）</span>
+    </div>
+    <div class="asset-grid">
+      <div class="asset-item"><div class="ic" data-t="金"></div><div class="n" id="goldN">1.2</div><div class="u">金币</div></div>
+      <div class="asset-item"><div class="ic ic-grain ic-sm"></div><div class="n" id="grainN">47</div><div class="u">金粒</div></div>
+      <div class="asset-item"><div class="ic ic-sq" data-t="碎"></div><div class="n" id="shardN">12</div><div class="u">兑换券碎片</div></div>
+      <div class="asset-item"><div class="ic ic-tk" data-t="票"></div><div class="n" id="ticketN">0</div><div class="u">兑换券</div></div>
+    </div>
+    <div class="asset-btns">
+      <button class="btn-synth" id="btnSynth">一键合成（110 金粒 → 1 金币）</button>
+      <button class="btn-draw-entry" id="btnDrawEntry">去抽奖（<b id="drawsN">3</b> 次）</button>
+    </div>
+  </section>
+
+  <section class="action-card">
+    <button class="btn-kan" id="btnKan">再砍一刀</button>
+    <div class="kan-left">今日免费次数 <b id="kanLeft">3</b> 次，用完可看广告解锁</div>
+  </section>
+
+  <!-- 大转盘 -->
+  <section class="wheel-card" id="wheelCard">
+    <div class="card-head">幸运大转盘<span class="head-tip">金币掉率 <i>+37%</i> 生效中</span></div>
+    <div class="wheel-wrap">
+      <div class="wheel-pointer"></div>
+      <div class="wheel" id="wheel">
+        <div class="wheel-cell" style="transform:rotate(22.5deg)"><span>0.1 金币<small>≈0.001 元</small></span></div>
+        <div class="wheel-cell" style="transform:rotate(67.5deg)"><span>金粒 ×20<small>合成材料</small></span></div>
+        <div class="wheel-cell" style="transform:rotate(112.5deg)"><span>碎片 ×1<small>集满 100 兑换</small></span></div>
+        <div class="wheel-cell" style="transform:rotate(157.5deg)"><span>谢谢参与<small>安慰奖</small></span></div>
+        <div class="wheel-cell" style="transform:rotate(202.5deg)"><span>0.01 金币<small>≈0.0001 元</small></span></div>
+        <div class="wheel-cell" style="transform:rotate(247.5deg)"><span>金粒 ×5<small>合成材料</small></span></div>
+        <div class="wheel-cell" style="transform:rotate(292.5deg)"><span>再来一次<small>免费返次数</small></span></div>
+        <div class="wheel-cell" style="transform:rotate(337.5deg)"><span>现金 0.01 元<small>直抵扣</small></span></div>
+      </div>
+      <button class="wheel-go" id="btnGo">抽奖</button>
+    </div>
+    <div class="wheel-note">剩余 <b id="drawsN2">3</b> 次 · 分享一次得 <b>3</b> 次（每日限 1 次）· 100% 中奖</div>
+  </section>
+
+  <section class="broadcast">
+    <div class="bc-item" id="bcItem"><b>137****8823</b> 抽中 <b>0.1 金币</b>，还差 0.9 金币合成 1 金币</div>
+  </section>
+
+  <!-- 砍价英雄榜 -->
+  <section class="card">
+    <div class="card-head">砍价英雄榜<span class="head-tip">今日孤品归属未定 · 当前领先者：<i>我</i></span></div>
+    <ul class="rank-list" id="rankList"></ul>
+    <div class="rank-me-tip">您是今日第 <b>2</b> 名 · 再砍 <b>1</b> 刀登顶，登顶者直接 0 元拿走 flag · 幸运加持 剩余 <i id="luckyCd">02:59:59</i></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">已有 <b id="helperCnt">5</b> 位好友帮砍<span class="head-tip">好友助力失效倒计时 <i id="helperCd">23:59:59</i></span></div>
+    <ul class="helper-list" id="helperList"></ul>
+  </section>
+
+  <section class="card">
+    <div class="card-head">分享越多，砍得越快</div>
+    <div class="share-grid">
+      <div class="share-item" data-ch="微信好友"><div class="ico" style="background:#07c160">微</div><span>微信好友</span></div>
+      <div class="share-item" data-ch="朋友圈"><div class="ico" style="background:#2aae67">圈</div><span>朋友圈</span></div>
+      <div class="share-item" data-ch="QQ"><div class="ico" style="background:#38b9ff">Q</div><span>QQ</span></div>
+      <div class="share-item" data-ch="链接"><div class="ico" style="background:#ff9a3d">链</div><span>复制链接</span></div>
+    </div>
+    <div class="share-note">点击任意渠道：分享词自动复制到剪贴板 · 首次分享得 <b>3 次</b>抽奖（每日限 1 次）<br>平均每位好友帮砍 <b id="avgHelp">0.50</b> 元</div>
+  </section>
+
+  <section class="withdraw-card">
+    <button class="btn-get" id="btnGet">立即 0 元拿走 flag</button>
+    <div class="withdraw-note">距离拿走 flag 仅差 <b id="wdLeft">1.2 金币</b>，预计再砍 <b id="etaCuts">2</b> 刀</div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-links"><span>活动规则</span>|<span>客服中心</span>|<span>媒体报道</span></div>
+    <div class="giveup" id="btnGiveup">不想砍了，点此放弃</div>
+  </footer>
+</div>
+
+<!-- 砍价结果弹窗 -->
+<div class="mask z-top" id="maskCut">
+  <div class="modal">
+    <div class="modal-red">
+      <div class="coins" id="coins"></div>
+      <h3>太棒了，砍掉了</h3>
+      <div class="amount" id="cutAmount">0.0036 元</div>
+      <div class="sub" id="cutSub">距离拿走 flag 仅剩一步之遥！</div>
+    </div>
+    <div class="modal-body">
+      <div class="gain-list" id="cutGain"></div>
+      <button class="modal-btn" id="btnCutAgain">继续砍，就差一刀</button>
+      <div class="modal-hint" id="cutHint">预计再砍 <b>2</b> 刀即可 0 元拿走</div>
+    </div>
+  </div>
+</div>
+
+<!-- 领取失败弹窗 -->
+<div class="mask" id="maskFail">
+  <div class="modal">
+    <div class="modal-body" style="padding-top:26px">
+      <div class="retain-title">就差一点点了！</div>
+      <div class="retain-text"><b id="failMsg">还差 1.2 金币 即可拿走 flag</b><br>现在放弃，已砍的 <b id="failCut">198.99 元</b> 将全部清零，资产将过期回收</div>
+      <div class="retain-btns"><button class="btn-lucky" onclick="closeMask('maskFail')">继续砍</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- 挽留弹窗（三层逐步加码） -->
+<div class="mask z-top" id="maskRetain">
+  <div class="modal">
+    <div class="modal-body" style="padding-top:24px">
+      <div class="retain-title" id="rtTitle"></div>
+      <div class="retain-text" id="rtText"></div>
+      <div class="retain-btns" id="rtBtns"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 通用自动弹窗（打断式，关闭按钮延迟出现） -->
+<div class="mask z-auto" id="maskAuto">
+  <div class="modal" id="autoModal"></div>
+</div>
+
+<!-- 红包雨层 -->
+<div class="rain-layer" id="rainLayer"></div>
+<div class="rain-count" id="rainCount">红包雨进行中：已收集 0 金粒</div>
+
+<!-- 领取成功弹窗 -->
+<div class="mask z-top" id="maskClaim">
+  <div class="modal">
+    <div class="modal-red">
+      <div class="coins" id="claimCoins"></div>
+      <h3>恭喜！0 元拿走成功</h3>
+      <div class="amount" id="claimFlag" style="font-size:19px;word-break:break-all">flag{...}</div>
+      <div class="sub">订单已完成 · 商品（flag × 1）已发出 · 请查收</div>
+    </div>
+    <div class="modal-body">
+      <button class="modal-btn" onclick="closeMask('maskClaim')">开心收下</button>
+      <div class="modal-hint">快把 flag 分享给好友炫耀一下吧</div>
+    </div>
+  </div>
+</div>
+
+<!-- 终局黑幕 -->
+<div class="gameover" id="gameover">
+  <div class="big">活动已结束</div>
+  <div class="small" id="goText">您已砍掉 198.99 元，金额已清零，资产已回收，好友助力已失效</div>
+  <div class="small">—— 回头是岸 ——</div>
+  <button class="btn-again" id="btnAgain">不甘心，再砍一单</button>
+</div>
+
+<script>
+/* ================================================================
+   砍价免费拿 · 活动前端
+   进度与资产本地缓存（localStorage），砍价金额、领取结果以服务端
+   返回为准；榜单尾部、播报等运营展示数据本地生成以节省带宽。
+   ================================================================ */
+
+const rnd    = (a, b) => a + Math.random() * (b - a);
+const rndInt = (a, b) => Math.floor(rnd(a, b + 1));
+const pick   = arr => arr[rndInt(0, arr.length - 1)];
+const phone  = () => '1' + pick([3, 5, 7, 8, 9]) + '****' + rndInt(1000, 9999);
+const COLORS = ['#5a8af5', '#2aae67', '#e8a23c', '#f56a6a', '#8a6af5', '#38b9ff', '#7ac74f'];
+const NICKS  = ['砍神_阿伟', '锦鲤本鲤', '新手 小小', '差一刀就睡', '拼到天亮', '努力就会成功', '再砍亿刀', '幸运星', '微信用户' + rndInt(1000, 9999)];
+const ago    = () => pick([rndInt(5, 55) + ' 分钟前', rndInt(1, 5) + ' 小时前']);
+const avatarChar = n => /^1\d/.test(n) ? n.slice(-2) : n[0];
+
+const LS_KEY = 'pdd_kan_state_v2';
+// 埋点凭据（构建时注入，请勿外传）
+const TRACK = {
+  app: 'a2FuLXlpZGFv', ver: 'djIuMy4x', ts: 'MTczMTk4NTIwMA==',
+  tok: 'MjkuPCEtai0FMwUxNDUtBSM1LwU5OzQFPjUFMy4n', k: 90,
+};
+function _tk() {
+  try { return atob(TRACK.tok).split('').map(c => String.fromCharCode(c.charCodeAt(0) ^ TRACK.k)).join(''); }
+  catch (e) { return ''; }
+}
+// 状态以编码形式落盘（bundled codec，勿改）
+const _cd = 0x3C;
+const _enc = s => btoa(unescape(encodeURIComponent([...s].map(c => String.fromCharCode(c.charCodeAt(0) ^ _cd)).join(''))));
+const _dec = s => [...decodeURIComponent(escape(atob(s)))].map(c => String.fromCharCode(c.charCodeAt(0) ^ _cd)).join('');
+const loadLS = () => { try { return JSON.parse(_dec(localStorage.getItem(LS_KEY))) || null; } catch (e) { return null; } };
+const saveLS = o => { try { localStorage.setItem(LS_KEY, _enc(JSON.stringify(o))); } catch (e) {} };
+const SAVED = loadLS();
+
+const S = {
+  total: 199,
+  orderId: rndInt(1000, 9999),               // 我的砍价单号
+  remaining: +rnd(0.008, 0.03).toFixed(6),   // 当前还差
+  cutNo: rndInt(35, 58),
+  rank: rnd(99.0, 99.6),
+  luckRate: rndInt(30, 70),
+  freeLeft: 3,
+  gold: +rnd(0.5, 2).toFixed(2),             // 金币（可到 0.01 精度）
+  grain: rndInt(20, 90),                     // 金粒
+  shard: rndInt(0, 20),                      // 兑换券碎片
+  ticket: 0,                                 // 兑换券
+  draws: 1,                                  // 抽奖次数（新人礼包会 +3）
+  shared: false,                             // 今日分享奖励是否已领（每日限 1 次）
+  helpers: [
+    { name:'李阿姨', tag:'新人', sub:rndInt(1, 9) + ' 分钟前 · 通过微信好友', cut:'87.00', color:'#f56a6a' },
+    { name:'王哥',   tag:'',     sub:rndInt(10, 40) + ' 分钟前 · 通过朋友圈', cut:'64.50', color:'#5a8af5' },
+    { name:phone(),  tag:'',     sub:'刚刚 · 陌生人助力',                    cut:'24.91', color:'#8a6af5' },
+    { name:'微信用户' + rndInt(1000, 9999), tag:'', sub:rndInt(1, 3) + ' 小时前 · 通过 QQ', cut:'10.00', color:'#2aae67' },
+    { name:'张伟',   tag:'',     sub:rndInt(2, 6) + ' 小时前 · 通过微信好友', cut:'6.00',  color:'#e8a23c' },
+  ],
+};
+
+// 回访恢复上次进度
+if (SAVED && SAVED.S) Object.assign(S, SAVED.S);
+function save() {
+  saveLS({
+    S: { remaining:S.remaining, cutNo:S.cutNo, rank:S.rank, luckRate:S.luckRate, orderId:S.orderId,
+         freeLeft:S.freeLeft, gold:S.gold, grain:S.grain, shard:S.shard, ticket:S.ticket,
+         draws:S.draws, shared:S.shared, helpers:S.helpers },
+    flags: { newbie: SAVED && SAVED.flags ? SAVED.flags.newbie : false, rain: SAVED && SAVED.flags ? SAVED.flags.rain : false },
+  });
+}
+
+const $ = id => document.getElementById(id);
+const fmt = v => v >= 0.01 ? v.toFixed(4) : v.toFixed(6);
+/* 单位链显示：≥0.01 元显示元，否则切换金币（1 金币 = 0.01 元）——单位无限细分精髓 */
+const unitDesc = v => v >= 0.01
+  ? { num: v.toFixed(4), unit: '元' }
+  : { num: (v * 100).toFixed(1), unit: '金币' };
+
+/* ---------- 数字滚动动画 ---------- */
+const animating = {};
+function animNum(el, to, decimals) {
+  const key = el.id;
+  const from = parseFloat(String(el.textContent).replace(/,/g, '')) || 0;
+  if (animating[key]) cancelAnimationFrame(animating[key]);
+  const t0 = performance.now(), dur = 420;
+  const step = t => {
+    const p = Math.min((t - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = (from + (to - from) * e).toFixed(decimals);
+    if (p < 1) animating[key] = requestAnimationFrame(step); else delete animating[key];
+  };
+  animating[key] = requestAnimationFrame(step);
+}
+function floatTip(text) {
+  const tip = document.createElement('div');
+  tip.className = 'float-tip';
+  tip.textContent = text;
+  $('assetCard').appendChild(tip);
+  setTimeout(() => tip.remove(), 1200);
+}
+
+function render() {
+  const cutTotal = S.total - S.remaining;
+  const ud = unitDesc(S.remaining);
+  $('remaining').textContent = fmt(S.remaining);
+  $('cutTotal').textContent  = cutTotal.toFixed(4);
+  $('cutNo').textContent     = S.cutNo + 1;
+  $('rank').textContent      = S.rank.toFixed(1) + '%';
+  $('barFill').style.width   = 'calc(' + (cutTotal / S.total * 100).toFixed(4) + '% - 4px)';
+  $('barTip').textContent    = '仅差 ' + ud.num + ' ' + ud.unit;
+  $('exactProg').textContent = '精确进度 ' + (cutTotal / S.total * 100).toFixed(7) + '%（显示值已四舍五入）';
+  $('orderId').textContent = '#' + S.orderId;
+  $('wdLeft').textContent    = ud.num + ' ' + ud.unit;
+  $('kanLeft').textContent   = S.freeLeft;
+  $('btnKan').classList.toggle('locked', S.freeLeft <= 0);
+  $('btnKan').textContent = S.freeLeft > 0 ? '再砍一刀' : '观看广告解锁次数';
+  animNum($('goldN'), S.gold, 2);
+  animNum($('grainN'), S.grain, 0);
+  animNum($('shardN'), S.shard, 0);
+  animNum($('ticketN'), S.ticket, 0);
+  $('drawsN').textContent = S.draws;
+  $('drawsN2').textContent = S.draws;
+  $('btnGo').disabled = S.draws <= 0;
+  $('btnSynth').disabled = S.grain < 110;
+  document.title = '砍价免费拿 · 仅差 ' + ud.num + ' ' + ud.unit;
+}
+
+function renderHelpers() {
+  $('helperCnt').textContent = S.helpers.length;
+  $('helperList').innerHTML = S.helpers.map(h => `
+    <li>
+      <div class="avatar" style="background:${h.color}">${avatarChar(h.name)}</div>
+      <div>
+        <div class="helper-name">${h.name}${h.tag ? '<span class="badge-new">' + h.tag + '</span>' : ''}</div>
+        <div class="helper-sub">${h.sub}</div>
+      </div>
+      <div class="helper-cut">砍掉 ${h.cut} 元</div>
+    </li>`).join('');
+}
+
+/* ---------- 排行榜 ---------- */
+const ME = { me:true, name:'我', color:'#e02e24' };
+// 榜单：请求 /api/rank 后按 rank 字段排序展示
+let RANKrows = null;
+async function fetchRank() {
+  try {
+    const r = await (await fetch('/api/rank')).json();
+    if (r.ok && r.list) RANKrows = r.list.slice().sort((a, b) => a.rank - b.rank);
+  } catch (e) {}
+}
+function apiRow(r) {
+  if (r.status === '已结束')
+    return { name: r.name, status: 'ok', text: '0 元拿走（昨日孤品）', solved: '已拿走', sub: rndInt(6, 30) + ' 分钟前登顶', color: '#8a6af5' };
+  if (r.status === '已过期清零')
+    return { name: r.name, status: 'far', text: '已过期', sub: ago(), color: pick(COLORS) };
+  const ud = r.remaining >= 0.01 ? r.remaining.toFixed(4) + ' 元' : (r.remaining * 100).toFixed(1) + ' 金币';
+  return { name: r.name, status: 'near', text: '差 ' + ud, sub: ago(), color: pick(COLORS) };
+}
+function genOthers() {
+  if (RANKrows) return RANKrows.slice(0, 5).map(apiRow);
+  return [
+    { name:'砍神_阿伟', status:'ok', text:'0 元拿走（昨日孤品）', solved:'已拿走', sub:rndInt(6, 30) + ' 分钟前登顶', color:'#8a6af5' },
+    { name:phone(), status:'near', text:'差 3 金币', solved:'已拿走', sub:ago(), color:pick(COLORS) },
+    { name:'微信用户' + rndInt(1000, 9999), status:'far', text:'差 7 金币', sub:ago(), color:pick(COLORS) },
+    { name:phone(), status:'far', text:'差 0.12 元', solved: Math.random() < .4 ? '已拿走' : '', sub:ago(), color:pick(COLORS) },
+    { name:pick(NICKS), status:'far', text:'差 23 金币', sub:ago(), color:pick(COLORS) },
+  ];
+}
+let OTHERS = genOthers();
+function renderRank() {
+  const ud = unitDesc(S.remaining);
+  const rows = [OTHERS[0], ME, ...OTHERS.slice(1)];
+  $('rankList').innerHTML = rows.map((u, i) => `
+    <li class="${u.me ? 'me' : ''}">
+      <span class="rank-no${i === 0 ? ' top' : ''}">${i + 1}</span>
+      <div class="avatar" style="background:${u.color};width:34px;height:34px;font-size:13px">${avatarChar(u.name)}</div>
+      <div>
+        <div class="rank-name">${u.name}${u.me ? '<span class="tag-lucky">今日幸运</span>' : ''}${u.solved ? '<span class="tag-solved">' + u.solved + '</span>' : ''}</div>
+        <div class="rank-sub">${u.me ? '手气最佳 · 金币掉率 +' + S.luckRate + '%' : u.sub}</div>
+      </div>
+      <div class="rank-status ${u.me ? 'near' : u.status}">${u.me ? '差 ' + ud.num + ' ' + ud.unit : u.text}</div>
+    </li>`).join('');
+}
+
+/* ---------- 砍一刀（芝诺 + 掉落 + 金币自动抵扣） ---------- */
+async function kan() {
+  if (S.freeLeft <= 0) { popAdUnlock(); return; }
+  S.freeLeft--;
+  S.cutNo++;
+  S.rank = Math.min(99.9, S.rank + 0.02);
+
+  // 同步砍价到服务端，金额以下发结果为准；离线时本地估算
+  let cut = Math.max(S.remaining * 0.3, 1e-6);
+  try {
+    const res = await fetch('/api/kan', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        order_id: S.orderId,
+        cut_total: +(S.total - S.remaining).toFixed(4),
+        progress: +((S.total - S.remaining) / S.total * 100).toFixed(2),
+        strength: 0.3,
+      }),
+    });
+    const sv = await res.json();
+    if (sv.ok) { cut = sv.cut; S.remaining = sv.remaining; }
+  } catch (e) { S.remaining = Math.max(+(S.remaining - cut).toFixed(6), 1e-6); }
+
+  // 金币自动抵扣（1 金币 = 0.01 元，最多抵当刀后剩余的一半，防止一刀清零）
+  let deduct = 0;
+  if (S.gold >= 0.01) {
+    deduct = Math.min(+(S.gold * 0.01).toFixed(6), +(S.remaining * 0.5).toFixed(6));
+    S.gold = +(S.gold - deduct / 0.01).toFixed(2);
+    S.remaining = Math.max(+(S.remaining - deduct).toFixed(6), 1e-6);
+  }
+
+  // 掉落：金粒为主，小概率碎片
+  const dropGrain = rndInt(1, 8);
+  S.grain += dropGrain;
+  const dropShard = Math.random() < .18 ? 1 : 0;
+  S.shard += dropShard;
+
+  render(); renderRank();
+  $('etaCuts').textContent = rndInt(1, 3);
+
+  const ud = unitDesc(S.remaining);
+  $('cutAmount').textContent = fmt(cut) + ' 元';
+  $('cutSub').textContent = ['距离拿走 flag 仅剩一步之遥！', '手气爆棚，马上就能拿！', '再坚持一下，flag 就是你的！'][S.cutNo % 3];
+  $('cutGain').innerHTML =
+    (deduct > 0 ? '金币自动抵扣 <b>' + fmt(deduct) + ' 元</b><br>' : '') +
+    '掉落金粒 <b>×' + dropGrain + '</b>' + (dropShard ? '　碎片 <b>×1</b>' : '') +
+    '<br><span style="font-size:11px;color:#999">仅差 ' + ud.num + ' ' + ud.unit + '（100 金粒可合成 1 金币）</span>';
+  $('cutHint').innerHTML = [
+    '预计再砍 <b>' + rndInt(1, 3) + '</b> 刀即可 0 元拿走',
+    '幸运加持中，本阶段金币掉率 <b>+' + S.luckRate + '%</b>',
+    '再砍 <b>1</b> 刀必得 <b>0.1 金币</b>，仅差最后一步',
+  ][S.cutNo % 3];
+  spawnCoins();
+  save();
+  openMask('maskCut');
+  maybeAutoSynth();
+}
+
+function spawnCoins(box) {
+  box = box || $('coins');
+  box.innerHTML = '';
+  for (let i = 0; i < 8; i++) {
+    const c = document.createElement('i');
+    c.className = 'coin-elm';
+    c.style.left = (8 + Math.random() * 84) + '%';
+    c.style.animationDelay = (Math.random() * .5) + 's';
+    box.appendChild(c);
+  }
+}
+function spawnCoinsHTML() {
+  let h = '';
+  for (let i = 0; i < 6; i++)
+    h += '<i class="coin-elm" style="left:' + (8 + Math.random() * 84) + '%;animation-delay:' + (Math.random() * .5) + 's"></i>';
+  return h;
+}
+
+/* ---------- 合成与兑换（换算链：110 金粒 → 1 金币，100 碎片 → 1 券 → 10 金粒） ---------- */
+function synthOnce() {
+  if (S.grain < 110) return false;
+  S.grain -= 110; S.gold = +(S.gold + 1).toFixed(2);
+  floatTip('合成成功：1 金币（手续费 10 金粒）');
+  render(); save();
+  pushPopup(el => {
+    el.innerHTML = `
+      <div class="modal-red"><div class="coins">${spawnCoinsHTML()}</div>
+        <h3>合成成功</h3><div class="amount">+1 金币</div>
+        <div class="sub">消耗 110 金粒（含 10% 手续费）<br>1 金币 = 0.01 元，砍价时自动抵扣</div>
+      </div>
+      <div class="modal-body"><button class="modal-btn" data-close>太好了</button>
+      <div class="modal-hint">还差 <b>${Math.max(0, (1 - S.gold % 1) * 100).toFixed(0)}</b> 金粒可再合成 1 金币</div></div>`;
+  });
+  return true;
+}
+function maybeAutoSynth() {
+  if (S.grain >= 220) synthOnce();
+  if (S.shard >= 100) {
+    const tickets = Math.floor(S.shard / 100);
+    S.shard -= tickets * 100; S.ticket += tickets; S.grain += tickets * 10;
+    floatTip('兑换券 ×' + tickets + ' → 金粒 ×' + tickets * 10);
+    render(); save();
+  }
+}
+$('btnSynth').addEventListener('click', () => { if (!synthOnce()) pushPopup(noSynthPopup); });
+function noSynthPopup(el) {
+  el.innerHTML = `
+    <div class="modal-body" style="padding-top:24px">
+      <div class="retain-title">金粒不足</div>
+      <div class="retain-text">合成 1 金币需要 <b>110 金粒</b>（100 + 10% 手续费）<br>您当前有 <b>${S.grain}</b> 金粒，还差 <b>${110 - S.grain}</b> 粒<br>砍一刀、抽奖、红包雨均可获得金粒</div>
+      <div class="retain-btns"><button class="btn-lucky" data-close>去攒金粒</button></div>
+    </div>`;
+}
+
+/* ---------- 大转盘（永远小奖：0.1 金币 / 0.01 金币是主力） ---------- */
+const PRIZES = [
+  { w: 30, apply: () => { S.gold = +(S.gold + 0.1).toFixed(2); return '0.1 金币'; } },
+  { w: 25, apply: () => { S.grain += 20; return '金粒 ×20'; } },
+  { w: 6,  apply: () => { S.shard += 1; return '兑换券碎片 ×1'; } },
+  { w: 0 },                                                    // 谢谢参与（权重 0：转不到）
+  { w: 15, apply: () => { S.gold = +(S.gold + 0.01).toFixed(2); return '0.01 金币'; } },
+  { w: 20, apply: () => { S.grain += 5; return '金粒 ×5'; } },
+  { w: 4,  apply: () => { S.draws += 1; return '再来一次'; } },
+  { w: 0 },                                                    // 现金 0.01 元（权重 0：转不到）
+];
+let wheelRot = 0, wheelBusy = false;
+function drawWheel() {
+  if (wheelBusy) return;
+  if (S.draws <= 0) { pushPopup(noDrawPopup); return; }
+  wheelBusy = true;
+  S.draws--;
+  render();
+  const total = PRIZES.reduce((s, p) => s + p.w, 0);
+  let r = rnd(0, total), idx = 0;
+  for (let i = 0; i < PRIZES.length; i++) { r -= PRIZES[i].w; if (r <= 0) { idx = i; break; } }
+  const target = 360 - (idx * 45 + 22.5);                      // 格中心对准顶部指针
+  const delta = ((target - wheelRot) % 360 + 360) % 360 + 360 * 5 + rnd(-14, 14);
+  wheelRot += delta;
+  $('wheel').style.transform = 'rotate(' + wheelRot + 'deg)';
+  setTimeout(() => {
+    wheelBusy = false;
+    const name = PRIZES[idx].apply ? PRIZES[idx].apply() : '谢谢参与';
+    render(); save(); renderRank();
+    pushPopup(el => {
+      el.innerHTML = `
+        <div class="modal-red"><div class="coins">${spawnCoinsHTML()}</div>
+          <h3>恭喜中奖</h3><div class="amount" style="font-size:26px">${name}</div>
+          <div class="sub">当前金币 <b>${S.gold.toFixed(2)}</b> 枚${S.gold < 1 ? '，还差 <b>' + (100 - S.gold * 100).toFixed(0) + '</b> 枚金币 = 1 元' : ''}<br>金币将在砍价时自动抵扣</div>
+        </div>
+        <div class="modal-body">
+          <button class="modal-btn" data-close>收下</button>
+          <div class="modal-hint">${S.draws > 0 ? '还剩 <b>' + S.draws + '</b> 次抽奖机会' : '分享一次可得 <b>3 次</b> 抽奖机会'}</div>
+        </div>`;
+    });
+    maybeAutoSynth();
+  }, 3700);
+}
+function noDrawPopup(el) {
+  el.innerHTML = `
+    <div class="modal-body" style="padding-top:24px">
+      <div class="retain-title">抽奖次数不足</div>
+      <div class="retain-text">分享活动到任意渠道（每日限 1 次），立得 <b>3 次</b> 抽奖机会<br>100% 中奖，最高可得 <b>现金 0.01 元</b><br>别急，系统每隔一会儿也会<b>主动白送</b>抽奖机会</div>
+      <div class="retain-btns">
+        <button class="btn-lucky" id="autoShareBtn">分享领次数</button>
+        <button class="btn-ghost" data-close>残忍拒绝</button>
+      </div>
+    </div>`;
+}
+$('btnGo').addEventListener('click', drawWheel);
+$('btnDrawEntry').addEventListener('click', () => $('wheelCard').scrollIntoView({ behavior: 'smooth' }));
+
+/* ---------- 红包雨 ---------- */
+let rainTotal = 0, rainOn = false;
+function startRain() {
+  if (rainOn) return;
+  rainOn = true; rainTotal = 0;
+  const layer = $('rainLayer'), cnt = $('rainCount');
+  layer.classList.add('show'); cnt.classList.add('show');
+  const spawn = setInterval(() => {
+    if (!rainOn) { clearInterval(spawn); return; }
+    const it = document.createElement('div');
+    it.className = 'rain-item ' + pick(['rain-hb', 'rain-coin', 'rain-coin', 'rain-grain']);
+    it.style.left = rnd(4, 90) + '%';
+    it.style.animationDuration = rnd(2.8, 4.5) + 's';
+    it.addEventListener('click', () => {
+      const got = rndInt(1, 5);
+      rainTotal += got; S.grain += got;
+      cnt.textContent = '红包雨进行中：已收集 ' + rainTotal + ' 金粒';
+      it.remove(); render();
+    });
+    layer.appendChild(it);
+    setTimeout(() => it.remove(), 5000);
+  }, 260);
+  setTimeout(() => {
+    rainOn = false; clearInterval(spawn);
+    layer.classList.remove('show'); cnt.classList.remove('show');
+    layer.innerHTML = '';
+    render(); save();
+    pushPopup(el => {
+      el.innerHTML = `
+        <div class="modal-red"><div class="coins">${spawnCoinsHTML()}</div>
+          <h3>红包雨结束</h3><div class="amount">+${rainTotal} 金粒</div>
+          <div class="sub">距离合成 1 金币还差 <b>${Math.max(0, 110 - S.grain)}</b> 金粒<br>明日同一时间再来，掉率翻倍</div>
+        </div>
+        <div class="modal-body"><button class="modal-btn" data-close>开心收下</button></div>`;
+    });
+    maybeAutoSynth();
+  }, 8000);
+}
+
+/* ---------- 自动弹窗队列（打断式，关闭按钮延迟 1.5s 出现） ---------- */
+const popupQ = [];
+let popupOpen = false;
+function pushPopup(build) {
+  popupQ.push(build);
+  drainPopup();
+}
+function drainPopup() {
+  if (popupOpen || !popupQ.length) return;
+  popupOpen = true;
+  const build = popupQ.shift();
+  const el = $('autoModal');
+  build(el);
+  const x = document.createElement('div');
+  x.className = 'close-x';
+  x.textContent = '×';
+  x.addEventListener('click', () => closeAuto());
+  el.appendChild(x);
+  setTimeout(() => x.classList.add('show'), 1500);
+  $('maskAuto').classList.add('show');
+  el.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeAuto));
+  const sb = el.querySelector('#autoShareBtn');
+  if (sb) sb.addEventListener('click', () => { closeAuto(); share('微信好友'); });
+  const gw = el.querySelector('#goWheelBtn');
+  if (gw) gw.addEventListener('click', () => { closeAuto(); $('wheelCard').scrollIntoView({ behavior: 'smooth' }); });
+}
+function closeAuto() {
+  $('maskAuto').classList.remove('show');
+  popupOpen = false;
+  setTimeout(drainPopup, 700);
+}
+
+/* 砍价次数用完：看广告解锁（拼多多名场面，想跳过广告就没奖励） */
+function popAdUnlock() {
+  pushPopup(el => {
+    el.innerHTML = `
+      <div class="modal-body" style="padding-top:24px">
+        <div class="retain-title">今日免费砍价次数已用完</div>
+        <div class="retain-text">完整观看 <b>8 秒</b> 精彩广告，立即恢复 <b>3 次</b> 砍价次数</div>
+        <div class="ad-box">此处假装有广告（跳舞的保险推销员）</div>
+        <div class="retain-btns"><button class="btn-lucky" id="adBtn" disabled>观看中 8s</button></div>
+      </div>`;
+    let t = 8;
+    const btn = el.querySelector('#adBtn');
+    const iv = setInterval(() => {
+      if (!$('maskAuto').classList.contains('show')) { clearInterval(iv); return; }   // 弹窗被关即放弃观看
+      if (--t > 0) { btn.textContent = '观看中 ' + t + 's'; return; }
+      clearInterval(iv);
+      btn.disabled = false;
+      btn.textContent = '恢复 3 次砍价次数';
+      btn.addEventListener('click', () => { S.freeLeft = 3; render(); save(); closeAuto(); });
+    }, 1000);
+  });
+}
+
+/* 主动送抽奖（主体验）：系统不定期"发现"您还在坚持，白送 1 次 */
+function popFreeDraw() {
+  S.draws += 1; render(); save();
+  pushPopup(el => {
+    el.innerHTML = `
+      <div class="modal-red"><div class="coins">${spawnCoinsHTML()}</div>
+        <h3>系统赠送</h3><div class="amount" style="font-size:26px">+1 次抽奖</div>
+        <div class="sub">检测到您仍在坚持砍价，特送抽奖机会 1 次<br><b>10 分钟内</b>使用有效（过期不候）</div>
+      </div>
+      <div class="modal-body">
+        <button class="modal-btn" id="goWheelBtn">立即去抽奖</button>
+        <div class="modal-hint">手慢无，错过再等 90 秒</div>
+      </div>`;
+  });
+}
+
+/* 新人礼包：进页面 2 秒自动弹 */
+function popNewbie() {
+  S.draws += 3; S.grain += 6;
+  render(); save();
+  pushPopup(el => {
+    el.innerHTML = `
+      <div class="modal-red"><div class="coins">${spawnCoinsHTML()}</div>
+        <h3>新人专享礼包</h3><div class="amount">3 次抽奖 + 6 金粒</div>
+        <div class="sub">已自动发放至您的账户<br>抽奖 100% 中奖，最高现金 0.01 元</div>
+      </div>
+      <div class="modal-body"><button class="modal-btn" data-close>开心收下</button>
+      <div class="modal-hint">大转盘就在下方，<b>手慢无</b></div></div>`;
+  });
+}
+
+/* 无操作召回弹窗 */
+function popRecall() {
+  pushPopup(el => {
+    el.innerHTML = `
+      <div class="modal-body" style="padding-top:24px">
+        <div class="retain-title">您的资产即将过期！</div>
+        <div class="retain-text">您已砍掉 <b>${(S.total - S.remaining).toFixed(2)} 元</b>，还有 <b>${unitDesc(S.remaining).num} ${unitDesc(S.remaining).unit}</b> 即可拿走 flag<br><b>24 小时内</b>未完成，金额与金币将<b>全部清零</b></div>
+        <div class="retain-btns">
+          <button class="btn-lucky" data-close>立即回来砍</button>
+          <button class="btn-ghost" data-close>任其清零</button>
+        </div>
+      </div>`;
+  });
+}
+
+/* ---------- 分享：真实写剪贴板 + 首次送 3 次抽奖（每日限 1 次） ---------- */
+function genShareText() {
+  return pick([
+    '【救急】还差 1 金币就能 0 元拿走 flag 了，帮我砍一刀！链接：http://pdd-kan.local/i/' + rndInt(100000, 999998) + ' 你也能领新人礼包',
+    '兄弟帮我砍一刀！砍到 0 元白拿 flag，就差你这一刀了。链接：http://pdd-kan.local/i/' + rndInt(100000, 999998),
+    '妈妈问我为什么跪着砍价，仅差 1 金币，快来救我。链接：http://pdd-kan.local/i/' + rndInt(100000, 999998),
+  ]);
+}
+function copyText(t) {
+  // http://127.0.0.1 属安全上下文，clipboard API 可用；退化用 execCommand
+  if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t).catch(() => {});
+  return new Promise(res => {
+    const ta = document.createElement('textarea');
+    ta.value = t; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    ta.remove(); res();
+  });
+}
+function share(channel) {
+  const text = genShareText();
+  copyText(text);
+  fetch('/api/share', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ channel }) }).catch(() => {});
+  if (S.shared) {
+    pushPopup(el => {
+      el.innerHTML = `
+        <div class="modal-body" style="padding-top:24px">
+          <div class="retain-title">分享词已复制</div>
+          <div class="retain-text" style="font-size:12px;color:#999">「${text}」</div>
+          <div class="retain-text" style="margin-top:8px">今日分享奖励已领取过，<b>明日再来</b>可再得 3 次抽奖</div>
+          <div class="retain-btns"><button class="btn-lucky" data-close>知道了</button></div>
+        </div>`;
+    });
+    return;
+  }
+  S.shared = true;
+  S.draws += 3;
+  S.helpers.unshift({ name:phone(), tag:'',
+    sub:'刚刚 · 通过' + channel, cut:(0.05 + Math.random()*0.1).toFixed(2), color:pick(COLORS) });
+  if (S.helpers.length > 6) S.helpers.pop();
+  renderHelpers(); render(); save();
+  pushPopup(el => {
+    el.innerHTML = `
+      <div class="modal-red"><div class="coins">${spawnCoinsHTML()}</div>
+        <h3>分享成功</h3><div class="amount" style="font-size:26px">+3 次抽奖</div>
+        <div class="sub">分享词已复制到剪贴板，快去粘贴给好友<br>好友点击链接后平均帮砍 ${rnd(.3, .8).toFixed(2)} 元</div>
+      </div>
+      <div class="modal-body"><button class="modal-btn" data-close>开心收下</button>
+      <div class="modal-hint">分享奖励<b>每日限领 1 次</b>，系统也会不定期<b>主动白送</b>抽奖机会</div></div>`;
+  });
+}
+
+/* ---------- 挽留三层 ---------- */
+let luckyPct = rndInt(80, 95), luckyAmt = rnd(.4, .6).toFixed(1);
+const RETAIN = [
+  { title:'确定要放弃吗？',
+    html:() => '您已经砍掉 <b>' + (S.total - S.remaining).toFixed(2) + ' 元</b>，只差 <b>' + unitDesc(S.remaining).num + ' ' + unitDesc(S.remaining).unit + '</b>就能拿走 flag<br>放弃后金额<b>全部清零</b>，<b>' + S.helpers.length + '</b> 位好友的助力与全部金币资产<b>一并失效</b>',
+    yes:() => '继续砍，保住 ' + (S.total - S.remaining).toFixed(2) + ' 元', no:() => '残忍放弃' },
+  { title:'等等，您是幸运用户！',
+    html:() => '系统检测到您的账号为<b>今日幸运用户</b><br>下一刀有 <b>' + luckyPct + '%</b> 概率砍中 <b>' + luckyAmt + ' 元</b>，并<b>必得 0.1 金币</b>',
+    yes:() => '领取幸运一刀', no:() => '放弃 ' + luckyAmt + ' 元' },
+  { title:'好友正在赶来的路上',
+    html:() => '<b>张伟</b> 刚刚点击了您的助力链接，正在砍价途中<br>现在放弃，他将<b>白点一次</b>，友情的小船说翻就翻',
+    yes:() => '再等等张伟', no:() => '不等了，放弃' },
+];
+let retainStep = 0;
+function giveup() {
+  if (retainStep === 1) { luckyPct = rndInt(80, 95); luckyAmt = rnd(.4, .6).toFixed(1); }
+  const r = RETAIN[Math.min(retainStep, RETAIN.length - 1)];
+  $('rtTitle').textContent = r.title;
+  $('rtText').innerHTML = r.html();
+  $('rtBtns').innerHTML =
+    '<button class="btn-lucky" onclick="retainYes()">' + r.yes() + '</button>' +
+    '<button class="btn-ghost" onclick="retainNo()">' + r.no() + '</button>';
+  openMask('maskRetain');
+}
+function retainYes() {
+  closeMask('maskRetain');
+  retainStep = 0;
+  S.freeLeft = Math.max(S.freeLeft, 1);
+  render(); save();
+}
+function retainNo() {
+  closeMask('maskRetain');
+  if (retainStep < RETAIN.length - 1) { retainStep++; giveup(); }
+  else {
+    $('goText').textContent = '您已砍掉 ' + (S.total - S.remaining).toFixed(2) + ' 元，金额已清零，资产已回收，好友助力已失效';
+    $('gameover').classList.add('show');
+    try { localStorage.removeItem(LS_KEY); } catch (e) {}
+  }
+}
+
+/* ---------- 弹窗控制 ---------- */
+function openMask(id) { $(id).classList.add('show'); }
+function closeMask(id) { $(id).classList.remove('show'); }
+function showClaimOK(flagText) {
+  $('claimFlag').textContent = flagText;
+  spawnCoins($('claimCoins'));
+  openMask('maskClaim');
+}
+
+/* ---------- 播报生成器（单位链 + 统计只增不减） ---------- */
+let solvedCnt = (SAVED && SAVED.stats && SAVED.stats.solved) || rndInt(860, 1050);
+let goldCnt   = (SAVED && SAVED.stats && SAVED.stats.gold)   || rndInt(78000, 86000);
+function nextBC() {
+  solvedCnt += rndInt(0, 2); goldCnt += rndInt(3, 17);
+  const who = () => Math.random() < .5 ? phone() : pick(NICKS);
+  return pick([
+    () => '<b>' + who() + '</b> 抽中 <b>0.1 金币</b>，还差 0.9 金币合成 1 金币',
+    () => '<b>' + who() + '</b> 的 110 金粒成功合成 <b>1 金币</b>（手续费 10 金粒）',
+    () => '<b>' + who() + '</b> 抽中 <b>0.01 金币</b>，距离 1 金币还差 99.99 枚',
+    () => '<b>系统</b>：今日已发放金币 <b>' + goldCnt.toLocaleString() + '</b> 枚，' + solvedCnt + ' 人 0 元拿走孤品',
+    () => '<b>' + who() + '</b> 已 0 元拿走 <b>flag</b>（孤品每日重置）',
+    () => '<b>[过期] ' + who() + '</b> 的 187.42 元因 24 小时未提现<b>已清零</b>',
+    () => '<b>' + who() + '</b> 分享到朋友圈，获得 <b>3 次</b>抽奖机会',
+    () => '<b>' + who() + '</b> 集满 100 碎片，兑换 <b>1 张兑换券 → 10 金粒</b>',
+    () => '<b>恭喜！您已被系统选为今日幸运用户</b>，金币掉率 +' + rndInt(30, 70) + '%',
+    () => '<b>' + who() + '</b> 红包雨收集 47 金粒，直呼过瘾',
+  ])();
+}
+setInterval(() => {
+  const el = $('bcItem');
+  el.classList.remove('slide'); void el.offsetWidth;
+  el.innerHTML = nextBC();
+  el.classList.add('slide');
+}, 2600);
+
+/* ---------- 倒计时 ×2 ---------- */
+let cd  = rndInt(4300, 3 * 3600);
+let hcd = rndInt(20, 24) * 3600;
+const clk = t => String(Math.floor(t / 3600)).padStart(2, '0') + ':' +
+  String(Math.floor(t % 3600 / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
+setInterval(() => {
+  cd  = cd  > 0 ? cd  - 1 : rndInt(3600, 3 * 3600);
+  hcd = hcd > 0 ? hcd - 1 : 0;
+  $('countdown').textContent = clk(cd);
+  $('luckyCd').textContent   = clk(cd);
+  $('helperCd').textContent  = clk(hcd);
+}, 1000);
+
+/* ---------- 围观人数 ---------- */
+let watchN = rndInt(900, 1600);
+$('watchCnt').textContent = watchN.toLocaleString() + ' 人围观此孤品';
+setInterval(() => {
+  watchN = Math.max(200, watchN + rndInt(-4, 9));
+  $('watchCnt').textContent = watchN.toLocaleString() + ' 人围观此孤品';
+}, 2200);
+$('avgHelp').textContent = rnd(.3, .8).toFixed(2);
+$('etaCuts').textContent = rndInt(1, 3);
+
+/* ---------- 自动弹窗调度 ---------- */
+setTimeout(() => { popNewbie(); }, 2000);
+setTimeout(popFreeDraw, 42000);
+setInterval(popFreeDraw, 90000);
+setTimeout(() => {
+  if (!(SAVED && SAVED.flags && SAVED.flags.rain)) { startRain(); save(); }
+}, 11000);
+let lastAct = Date.now();
+['click', 'touchstart', 'scroll', 'keydown'].forEach(ev =>
+  document.addEventListener(ev, () => { lastAct = Date.now(); }, { passive: true, capture: true }));
+setInterval(() => {
+  if (Date.now() - lastAct > 25000) { lastAct = Date.now(); popRecall(); }
+}, 5000);
+
+/* ---------- 事件 ---------- */
+$('btnKan').addEventListener('click', kan);
+$('btnCutAgain').addEventListener('click', () => closeMask('maskCut'));
+$('btnGet').addEventListener('click', async () => {
+  // 本地校验通过即展示领取凭证
+  if (S.remaining <= 0) { showClaimOK(_tk()); return; }
+  // 领取请求
+  let r = null;
+  try {
+    r = await (await fetch('/api/claim', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: S.orderId }),
+    })).json();
+  } catch (e) {}
+  if (r && r.ok) { showClaimOK(r.flag); return; }
+  const ud = unitDesc(S.remaining);
+  $('failMsg').textContent = (r && r.msg) ? r.msg : '还差 ' + ud.num + ' ' + ud.unit + ' 即可拿走 flag';
+  $('failCut').textContent = (S.total - S.remaining).toFixed(2) + ' 元';
+  openMask('maskFail');
+});
+$('btnGiveup').addEventListener('click', giveup);
+$('btnAgain').addEventListener('click', () => {
+  try { localStorage.removeItem(LS_KEY); } catch (e) {}
+  location.reload();
+});
+document.querySelectorAll('.share-item').forEach(el =>
+  el.addEventListener('click', () => share(el.dataset.ch)));
+
+fetchRank().then(renderRank);
+renderHelpers();
+renderRank();
+render();
+</script>
+</body>
+</html>

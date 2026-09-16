@@ -1,0 +1,8 @@
+{
+  "name": "kan-yi-dao-build-tools",
+  "private": true,
+  "description": "出题方前端构建工具链（node>=18，仅构建期需要，不进容器）",
+  "dependencies": {
+    "javascript-obfuscator": "^4.1.1"
+  }
+}
