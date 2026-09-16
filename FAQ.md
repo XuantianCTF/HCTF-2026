@@ -104,6 +104,16 @@ pub async fn environ(bucket, user, team) {
 
 由于简单评测脚本是面向`静态flag`的情况，所以要修改上面的对应两行代码即可
 
+#### 有关flag头(重点)
+
+ret2shell默认flag头是`flag`,在checker脚本中,需要手动设定
+
+```rust
+const prefix = "HCTF"
+```
+
+需要注意
+
 ### 提示
 
 ![hint](./images/hint.png)
