@@ -1,8 +1,9 @@
 # web_ua_checkin —— Web 签到题（PHP 版 · Only iPhone）出题人文档
 
 > 玩家不可见本文档。改编自原签到题 ua-checkin（PHP 版），本版是其 HCTF-2026
-> 规范化版本：flag 由硬编码改为平台动态注入，UA 分流逻辑、整蛊跳转与页面
-> 玩梗文案（"求你们不要再嘲笑这些题目了 QWQ"、Only iPhone 梗）零改动。
+> 规范化版本：flag 由硬编码改为平台动态注入，并由白盒改为**黑盒**（不发布
+> 源码附件，选手仅有线上靶机地址），UA 分流逻辑、整蛊跳转与页面玩梗文案
+> （"求你们不要再嘲笑这些题目了 QWQ"、Only iPhone 梗）零改动。
 
 模仿真实钓鱼站 cloaking（UA 差异化响应）手法的签到题，服务端分流，玩库克 "Only iPhone can do" 梗。
 
@@ -27,7 +28,7 @@
 
 | 访问环境 | 表现 |
 |---|---|
-| iPhone（UA 含 `iPhone`，Safari/微信/QQ 内置浏览器等 iOS 全系） | 200，下发苹果发布会暗色海报风页面：Apple logo + **Only iPhone can do.** + "很 iPhone。" + "进一步了解"胶囊按钮，HTML 注释内含动态 flag 的 base64 |
+| iPhone（UA 含 `iPhone`，Safari/微信/QQ 内置浏览器等 iOS 全系） | 200，下发苹果发布会暗色海报风页面：Apple logo + **Only iPhone can do.** + "尊贵的iPhone用户，这份flag为你呈上，点击即可获得" + "马上获得"胶囊按钮，HTML 注释内含动态 flag 的 base64 |
 | 其他一切：Android / iPad / Mac / 桌面 / curl / 空 UA | `302 Found` + `Location:` 整蛊视频，**响应体 0 字节，flag 不下发** |
 
 iPad 也被拦（只有 iPhone 才配），呼应梗本身。
@@ -61,13 +62,13 @@ cd src
 ../../php/php.exe -S 0.0.0.0:8080        # 或任意 php >= 8
 ```
 
-附件目录 `attachment/` 只有 index.php（与 src 版一致）和运行说明，
-**不含 Dockerfile**（发布 CI 会对附件 Dockerfile 强制执行 builder 阶段
-构建并提取 ELF，Web 题没有该阶段会导致 CI 失败）。
+黑盒设计：`attachment/` 已移除，选手拿不到源码，预期解法的每一步都只依赖
+线上靶机的 HTTP 响应行为（302 目标、`X-Powered-By`、UA 差异化响应），见下节。
+`src/` 是唯一源码存放处，仅出题方与部署平台可见。
 
 ## 预期解法（签到难度）
 
-1. 电脑/安卓打开 → 被骗视频；iPhone 打开 → 苹果海报页一本正经"系统已确认您正在使用 iPhone"——但页面上没有任何 flag
+1. 电脑/安卓打开 → 被骗视频；iPhone 打开 → 苹果海报页一本正经"尊贵的iPhone用户，这份flag为你呈上"——但页面上没有任何 flag
 2. `curl -I` 看到 302 + `X-Powered-By: PHP` → 意识到服务端按 UA 分流
 3. `curl -A "<iPhone的UA>" http://xxx/` 伪造 UA 拿到海报页源码 → 注释里 base64 → 解码出 `hctf{...}`
 4. 等价路径：DevTools → Network conditions 自定义 UA 刷新后 view-source
@@ -101,3 +102,9 @@ exp.py 覆盖：Android/iPad/curl/空 UA 全部 302 且响应体 0 字节、Loca
 - `FLAG="hctf{dyn_test}"` 启动 → 同一注释位解码 = `hctf{dyn_test}`（动态注入生效）
 - `writeup/exp.py`：17/17 通过；带 `FLAG=hctf{dyn_test}` 运行：18/18 通过（含与环境变量精确比对）
 - 与原题 diff：仅注释内 flag 一行不同，其余逻辑与文案逐字节一致
+
+## 已验证（2026-09-16，neko 虚机 Docker + `php:8.3-cli-alpine`）
+
+- Alpine 镜像 157MB（原 `php:8.3-apache` 版 761MB），`php -S` + 8 workers
+- `writeup/exp.py` 对线上容器 18/18 通过（含 `FLAG` 环境变量精确比对）
+- Windows 外部访问复核：默认 UA 302 / iPhone UA 200 海报页

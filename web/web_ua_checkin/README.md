@@ -1,9 +1,8 @@
 # web_ua_checkin
 
-- **分类**：Web / 白盒（附件提供全部源码）
+- **分类**：Web / 黑盒（无附件，仅线上靶机）
 - **难度**：签到
 - **题型**：HTTP 头认知与伪造（UA cloaking）+ 编码还原
-- **附件**：`attachment/`（index.php 源码 + 本地运行说明）
 
 ## 题面
 
@@ -22,7 +21,8 @@ docker build -t ua_checkin ./src
 docker run -d -p 8080:80 -e FLAG="hctf{xxx}" ua_checkin
 ```
 
-- 单文件 PHP 页面，`php:8.3-apache`，容器内监听 80 端口，无外部依赖
+- 单文件 PHP 页面，`php:8.3-cli-alpine` + PHP 内置服务器（`php -S`），容器内监听 80 端口，无外部依赖
+- 纯 PHP 脚本与底层 libc 无关，按仓库规范使用 alpine 底座
 - **动态 flag**：平台向容器注入 `FLAG` 环境变量；未注入时使用代码内回退值
 
 ## 说明
