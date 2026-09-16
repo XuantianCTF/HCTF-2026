@@ -88,12 +88,12 @@ Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHT
 
 ```bash
 php -S 127.0.0.1:8089 -t src
-python writeup/exp.py http://127.0.0.1:8089
+python writeup/exp.py http://127.0.0.1:8089     # 输出解码后的 hctf{...}
 ```
 
-exp.py 覆盖：Android/iPad/curl/空 UA 全部 302 且响应体 0 字节、Location
-指向整蛊视频；iPhone UA 200 且海报页与玩梗注释完整；注释 base64 解码结果
-符合 `hctf{}` 格式；若 exp 运行环境带 `FLAG` 变量则与解码值精确比对。
+exp.py 为 PoC：伪造 iPhone UA 请求一次，解出注释里的 base64 并打印 flag，
+人工与部署时注入的 `$FLAG` 比对即可。拦截分支（非 iPhone UA 一律 302、
+响应体 0 字节）按 wp.md 步骤用 `curl -I` 复核。
 
 ## 已验证（2026-09-15，PHP 8.5.10 NTS x64）
 
@@ -106,5 +106,6 @@ exp.py 覆盖：Android/iPad/curl/空 UA 全部 302 且响应体 0 字节、Loca
 ## 已验证（2026-09-16，neko 虚机 Docker + `php:8.3-cli-alpine`）
 
 - Alpine 镜像 157MB（原 `php:8.3-apache` 版 761MB），`php -S` + 8 workers
-- `writeup/exp.py` 对线上容器 18/18 通过（含 `FLAG` 环境变量精确比对）
+- 验收版 exp.py（git 历史可溯）曾对线上容器 18/18 通过（含 `FLAG` 环境变量
+  精确比对）；后按 PoC 定位改写，对线上容器解出 flag 与注入 `$FLAG` 一致
 - Windows 外部访问复核：默认 UA 302 / iPhone UA 200 海报页
