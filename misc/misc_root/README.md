@@ -4,7 +4,7 @@
 
 Misc
 
-##出题人
+## 出题人
 
 みみみみみ
 
@@ -21,7 +21,7 @@ flag格式：hctf{}
 
 见 `attachment/` 目录
 
-##flag
+## flag
 
 hctf{QingLiLaJi:sudo_rm-f/*}
 
