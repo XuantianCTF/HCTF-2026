@@ -123,3 +123,10 @@ git checkout -b "题目名称"  # 在最新main分支的基础上创建分支
 6. **只放演示 flag**，不要写入真实 flag；附件会被公开发布。动态 flag 由部署镜像（`src/`）从 `FLAG` 环境变量读取。
 
 7. **附件镜像不推送到 ghcr**。CI 仅在 PR 校验与发布时构建/提取产物；需要发布部署镜像时请编写 `src/Dockerfile`。
+
+
+### 逆向场景
+
+如果不需要构建在线平台镜像,就不要在`src/`目录下写Dockerfile
+
+只在attachment目录下写Dockerfile即可,该目录下的Dockerfile编写规则同上
