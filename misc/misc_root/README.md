@@ -22,6 +22,7 @@ flag格式：hctf{}
 见 `attachment/` 目录
 
 ##flag
+
 hctf{QingLiLaJi:sudo_rm-f/*}
 
 
