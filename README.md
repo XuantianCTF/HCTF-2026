@@ -20,6 +20,9 @@ ctf-challenges/
 ├── crypto/                      # 题目分类：密码学
 │   └── crypto_rsa_variant/
 │
+├── reverse/                     # 题目分类：逆向
+│   └── ezgo/
+│
 └── misc/                        # 题目分类：杂项
     └── misc_forensics/
 ```
