@@ -37,7 +37,7 @@ jobs:
 
           DIRS="$(
             printf '%s\n' "$CHANGED" \
-              | awk -F/ 'NF>=3 && ($1=="web"||$1=="pwn"||$1=="crypto"||$1=="misc") {print $1"/"$2}' \
+              | awk -F/ 'NF>=3 && ($1=="web"||$1=="pwn"||$1=="crypto"||$1=="misc"||$1=="reverse") {print $1"/"$2}' \
               | sort -u
           )"
 
@@ -79,7 +79,7 @@ jobs:
           fail=0
 
           case "$cat" in
-            web|pwn|crypto|misc) ;;
+            web|pwn|crypto|misc|reverse) ;;
             *) echo "::error::$c: unknown category '$cat'"; fail=1 ;;
           esac
 
