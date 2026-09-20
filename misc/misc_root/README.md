@@ -24,6 +24,3 @@ flag格式：hctf{}
 ## flag
 
 hctf{QingLiLaJi:sudo_rm-f/*}
-
-
-

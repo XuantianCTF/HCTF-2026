@@ -4,14 +4,23 @@
 
 Misc
 
+## 出题人
+
+みみみみみ
+
 ## 难度
 
-待确认
+简单
 
 ## 题目描述
 
-待补充
+kfc疯狂星期三，vivo50，送你flag（
+flag格式：hctf{}
 
 ## 附件
 
 见 `attachment/` 目录
+
+## flag
+
+hctf{SanXiaoZhi_KaWa11}

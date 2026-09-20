@@ -22,4 +22,6 @@ flag格式：hctf{拼接四段part}
 
 见 `attachment/` 目录
 
-flag：hctf{m1ao_mia0_mi4o?mimimi}
+## flag
+
+hctf{m1ao_mia0_mi4o?mimimi}

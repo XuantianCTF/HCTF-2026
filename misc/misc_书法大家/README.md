@@ -4,14 +4,24 @@
 
 Misc
 
+## 出题人
+
+みみみみみ
+
 ## 难度
 
-待确认
+简单
 
 ## 题目描述
 
-待补充
+众所周知，鼠标也是一种书写工具（
+
+flag格式：hctf{}
 
 ## 附件
 
 见 `attachment/` 目录
+
+## flag
+
+hctf{WoQu_ShuBiaoXieZi_HaoNanA!}
