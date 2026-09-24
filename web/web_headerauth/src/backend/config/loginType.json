@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "success": true,
+    "statusCode": 200,
+    "message": "ok"
+  },
+  "data": {
+    "loginTabType": "1",
+    "loginTabDefault": "1",
+    "loginIconType": "1",
+    "isSMS": "1",
+    "isFinger": "0",
+    "isWebAuthn": "0",
+    "isApp": "1",
+    "isWeChat": "1",
+    "isWeChatOpenLogin": "0",
+    "isqq": "0",
+    "isWeiBo": "0",
+    "isDingDing": "0",
+    "isMMDL": "0",
+    "isUkeyLogin": "0",
+    "isVerifyCode": "0",
+    "isVerifyCodeType": "",
+    "isFristModifyPwd": "1",
+    "isFristBindPhone": "1",
+    "isFristBindEmail": "0",
+    "isFristBindQus": "0",
+    "isFristBindOTP": "0",
+    "isTwoVerify": "1",
+    "smsSendTime": "2",
+    "emailSendTime": "2",
+    "defaultLoginUrl": "/",
+    "loginpage": "1",
+    "netcommit": "0",
+    "casTitle": "统一身份认证平台",
+    "casfoot": "<div style=\"width:100vw;height:40px;\">\n<p style=\"margin-top: 2px; \">Copyright @2018 CTF ORG.</p> <p>All Rights Reserved. 本页面为 CTF 比赛复刻环境，与任何真实学校无关</p></div>",
+    "casDesc": "技术支持：ctf-support@example.com",
+    "language": "zh_CN",
+    "loginFuncButton": "",
+    "isAccount": "1",
+    "themeColor": "rgb(57,126,240)",
+    "tabType": "1",
+    "showType": "1",
+    "ddScanLoginMode": "0",
+    "isOpenLoginAppeal": "0",
+    "twoVerifyWay": "1,2,3",
+    "isOpenLoginAcountCheck": "0",
+    "loginAppealUrl": "/",
+    "loginActivateUrl": "",
+    "loginfoundPaawordUrl": "/",
+    "loginQuestionUrl": "/",
+    "mobileLoginActivateUrl": "",
+    "mobileLoginQuestionUrl": "/",
+    "mobileLoginfoundPaawordUrl": "/",
+    "verifyCodeNum": "-1",
+    "attachments": [
+      {
+        "sourceId": "cas-attachment_appQRCode",
+        "source": "/group1/M00/00/0D/0ityWGY8P2OAan5cAAAF7l88oQU039.png",
+        "attachmentId": "52f71790-07be-4525-8320-2a3f6a694715"
+      },
+      {
+        "sourceId": "cas-attachment_bg1",
+        "source": "/group1/M00/00/0E/0ityWGij5DqAFLuaABcyHkJ18ek966.jpg",
+        "attachmentId": "fb77760f-3ee7-4c54-ac91-1b63808841f4"
+      },
+      {
+        "sourceId": "cas-attachment_casLogo",
+        "source": "/group1/M00/00/0D/0ityWGarV8CADheZAABR86T6mao881.png",
+        "attachmentId": "c4d174fa-240d-4fd0-8e5e-4f9a44b14e03"
+      },
+      {
+        "sourceId": "cas-attachment_mobile_casLogo",
+        "source": "/group1/M00/00/0D/0ityWGara4uAUYLiAABbZKRDOnM245.png",
+        "attachmentId": "5ea5b279-6745-4142-b66c-985851d7a814"
+      }
+    ],
+    "tgcTimeout": 3600,
+    "captchaType": "1",
+    "loginOTP": "0",
+    "autoNoPassLogin": "",
+    "skipLoginBind": ""
+  }
+}
