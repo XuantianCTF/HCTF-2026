@@ -101,13 +101,26 @@ jobs:
             fi
           done < <(find "$tmp" -maxdepth 1 -type f -perm -u+x -print0)
 
+          # Android challenges ship an APK instead of an ELF.
           if [ "$found" -eq 0 ]; then
-            echo "::error::no ELF binary found in builder output for ${name}"
+            apk="$(find "$tmp" -maxdepth 1 -type f -name '*.apk' | head -n 1 || true)"
+            if [ -n "$apk" ]; then
+              cp "$apk" "dist/${name}/${name}.apk"
+              found=1
+            fi
+          fi
+
+          if [ "$found" -eq 0 ]; then
+            echo "::error::no ELF binary or APK found in builder output for ${name}"
             exit 1
           fi
 
-          chmod +x "dist/${name}/${name}"
-          file "dist/${name}/${name}"
+          if [ -f "dist/${name}/${name}" ]; then
+            chmod +x "dist/${name}/${name}"
+            file "dist/${name}/${name}"
+          else
+            file "dist/${name}/${name}.apk"
+          fi
 
           if [ -d "$tmp/libc" ] && [ -n "$(ls -A "$tmp/libc")" ]; then
             mkdir -p "dist/${name}/libc"
@@ -143,20 +156,31 @@ jobs:
           for d in dist/*/; do
             name="$(basename "$d")"
 
+            if [ -f "$d/$name" ]; then
+              srcfile="$d/$name"
+              outname="$name"
+            elif [ -f "$d/$name.apk" ]; then
+              srcfile="$d/$name.apk"
+              outname="$name.apk"
+            else
+              echo "::warning::no artifact found for ${name}, skip"
+              continue
+            fi
+
             if [ -d "$d/libc" ] && [ -n "$(ls -A "$d/libc")" ]; then
               stage="$(mktemp -d)"
-              cp "$d/$name" "$stage/$name"
+              cp "$srcfile" "$stage/$outname"
               cp -a "$d/libc/." "$stage/"
-              chmod +x "$stage/$name"
+              chmod +x "$stage/$outname"
               (cd "$stage" && zip -r "$GITHUB_WORKSPACE/release/${name}.zip" . >/dev/null)
               echo "packed ${name}.zip:"
               unzip -l "release/${name}.zip"
             else
-              cp "$d/$name" "release/${name}"
-              chmod +x "release/${name}"
+              cp "$srcfile" "release/${outname}"
+              chmod +x "release/${outname}"
             fi
 
-            gh release delete-asset attachments "$name" -R "$GITHUB_REPOSITORY" -y 2>/dev/null || true
+            gh release delete-asset attachments "$outname" -R "$GITHUB_REPOSITORY" -y 2>/dev/null || true
             gh release delete-asset attachments "${name}.zip" -R "$GITHUB_REPOSITORY" -y 2>/dev/null || true
           done
 

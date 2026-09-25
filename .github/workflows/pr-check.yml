@@ -37,7 +37,7 @@ jobs:
 
           DIRS="$(
             printf '%s\n' "$CHANGED" \
-              | awk -F/ 'NF>=3 && ($1=="web"||$1=="pwn"||$1=="crypto"||$1=="misc"||$1=="reverse") {print $1"/"$2}' \
+              | awk -F/ 'NF>=3 && ($1=="web"||$1=="pwn"||$1=="crypto"||$1=="misc"||$1=="reverse"||$1=="mobile") {print $1"/"$2}' \
               | sort -u
           )"
 
@@ -79,7 +79,7 @@ jobs:
           fail=0
 
           case "$cat" in
-            web|pwn|crypto|misc|reverse) ;;
+            web|pwn|crypto|misc|reverse|mobile) ;;
             *) echo "::error::$c: unknown category '$cat'"; fail=1 ;;
           esac
 
@@ -89,8 +89,12 @@ jobs:
           fi
 
           if [ ! -f "$c/src/Dockerfile" ]; then
-            echo "::error::$c: missing src/Dockerfile (deployment build)"
-            fail=1
+            if [ "$cat" = "mobile" ] || [ "$cat" = "reverse" ]; then
+              echo "::warning::$c: missing src/Dockerfile (offline challenge, allowed)"
+            else
+              echo "::error::$c: missing src/Dockerfile (deployment build)"
+              fail=1
+            fi
           fi
 
           [ -f "$c/attachment/Dockerfile" ] || echo "::warning::$c: missing attachment/Dockerfile (public build, optional)"
@@ -118,6 +122,7 @@ jobs:
       - uses: docker/setup-buildx-action@v3
 
       - name: Build src image
+        if: ${{ hashFiles(format('{0}/src/Dockerfile', matrix.dir)) != '' }}
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.dir }}/src
