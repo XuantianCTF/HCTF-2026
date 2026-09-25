@@ -167,10 +167,17 @@ jobs:
               continue
             fi
 
+            has_libc=false
             if [ -d "$d/libc" ] && [ -n "$(ls -A "$d/libc")" ]; then
+              has_libc=true
+            fi
+
+            if [ "$has_libc" = true ] || [[ "$outname" == *.apk ]]; then
               stage="$(mktemp -d)"
               cp "$srcfile" "$stage/$outname"
-              cp -a "$d/libc/." "$stage/"
+              if [ "$has_libc" = true ]; then
+                cp -a "$d/libc/." "$stage/"
+              fi
               chmod +x "$stage/$outname"
               (cd "$stage" && zip -r "$GITHUB_WORKSPACE/release/${name}.zip" . >/dev/null)
               echo "packed ${name}.zip:"
