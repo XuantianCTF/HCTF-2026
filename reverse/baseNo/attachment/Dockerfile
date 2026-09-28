@@ -18,3 +18,4 @@ WORKDIR /app
 COPY --from=builder /build/baseNo.exe /app/baseNo.exe
 
 CMD ["wine", "/app/baseNo.exe"]
+
