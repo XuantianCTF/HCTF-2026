@@ -93,10 +93,18 @@ jobs:
 
           mkdir -p "dist/${name}"
           found=0
+          kind=""
           while IFS= read -r -d '' f; do
-            if file -b "$f" | grep -q '^ELF'; then
+            ft="$(file -b "$f")"
+            if [[ "$ft" == ELF* ]]; then
               cp "$f" "dist/${name}/${name}"
               found=1
+              kind="elf"
+              break
+            elif [[ "$ft" == PE32* ]]; then
+              cp "$f" "dist/${name}/${name}.exe"
+              found=1
+              kind="pe"
               break
             fi
           done < <(find "$tmp" -maxdepth 1 -type f -perm -u+x -print0)
@@ -107,20 +115,20 @@ jobs:
             if [ -n "$apk" ]; then
               cp "$apk" "dist/${name}/${name}.apk"
               found=1
+              kind="apk"
             fi
           fi
 
           if [ "$found" -eq 0 ]; then
-            echo "::error::no ELF binary or APK found in builder output for ${name}"
+            echo "::error::no ELF binary, PE binary or APK found in builder output for ${name}"
             exit 1
           fi
 
-          if [ -f "dist/${name}/${name}" ]; then
-            chmod +x "dist/${name}/${name}"
-            file "dist/${name}/${name}"
-          else
-            file "dist/${name}/${name}.apk"
-          fi
+          case "$kind" in
+            elf) chmod +x "dist/${name}/${name}"; file "dist/${name}/${name}" ;;
+            pe)  chmod +x "dist/${name}/${name}.exe"; file "dist/${name}/${name}.exe" ;;
+            apk) file "dist/${name}/${name}.apk" ;;
+          esac
 
           if [ -d "$tmp/libc" ] && [ -n "$(ls -A "$tmp/libc")" ]; then
             mkdir -p "dist/${name}/libc"
@@ -162,6 +170,9 @@ jobs:
             elif [ -f "$d/$name.apk" ]; then
               srcfile="$d/$name.apk"
               outname="$name.apk"
+            elif [ -f "$d/$name.exe" ]; then
+              srcfile="$d/$name.exe"
+              outname="$name.exe"
             else
               echo "::warning::no artifact found for ${name}, skip"
               continue
