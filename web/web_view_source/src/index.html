@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HCTF 2026 · 欢迎</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    line-height: 1.7;
+  }
+  .card { max-width: 640px; width: 100%; }
+  h1 { font-size: 32px; margin-bottom: 20px; }
+  p { color: #9da7b3; margin-bottom: 14px; }
+  .hint {
+    margin-top: 28px;
+    padding: 16px 18px;
+    border-left: 3px solid #3fb950;
+    background: #161b22;
+    border-radius: 6px;
+    color: #c9d1d9;
+    font-size: 15px;
+  }
+  kbd {
+    display: inline-block;
+    padding: 1px 7px;
+    border: 1px solid #30363d;
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    background: #21262d;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    color: #e6edf3;
+  }
+  code { color: #79c0ff; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>欢迎参加 HCTF 2026！</h1>
+  <p>这是一道 Web 热身题。flag 就藏在这个页面里，但页面上你永远看不到它。</p>
+  <p>因为浏览器收到的，远比你看到的多。</p>
+  <div class="hint">
+    <strong>小课堂 · 查看源代码</strong><br>
+    在浏览器里按 <kbd>Ctrl</kbd>+<kbd>U</kbd>（macOS 为 <kbd>Cmd</kbd>+<kbd>Option</kbd>+<kbd>U</kbd>）
+    查看网页源代码，或者按 <kbd>F12</kbd> 打开开发者工具（Elements / 元素）。
+    你会看到服务器发来的完整 HTML，包括不会显示在页面上的注释。
+  </div>
+</main>
+<!--
+  ============================================================
+  小课堂 · 注释（comment）
+
+  网页源代码里，被注释符号包起来的部分不会显示在页面上，
+  但它会随整个 HTML 响应一起发送到你的浏览器。
+  查看网页源代码，就能看到注释。
+  ============================================================
+-->
+<!-- 别往这里看了，flag 不在这行。 -->
+<!-- 好吧，你赢了，flag 在这行： -->
+<!-- FLAG: {{FLAG}} -->
+</body>
+</html>
