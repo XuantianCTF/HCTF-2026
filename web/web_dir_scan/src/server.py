@@ -43,8 +43,7 @@ INDEX_HTML = """<!doctype html>
   <p>真的，不信你到处点点看？反正我也没做导航。</p>
   <div class="hint">
     小课堂 · 目录扫描：站点某些路径不会出现在链接里，但可以直接访问。<br>
-    用 dirsearch / ffuf / gobuster 之类工具扫一遍，或者先想想——爬虫是怎么知道哪些页面"不该被收录"的？
-  </div>
+    </div>
 </main>
 </body>
 </html>
