@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>内部系统 · 登录</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f0f2f5; color: #1f2329;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .box {
+    width: 360px; background: #fff; border-radius: 12px; padding: 32px 28px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .08);
+  }
+  h1 { font-size: 20px; margin-bottom: 6px; }
+  .sub { font-size: 13px; color: #999; margin-bottom: 24px; }
+  label { display: block; font-size: 13px; color: #555; margin: 14px 0 6px; }
+  input {
+    width: 100%; padding: 10px 12px; border: 1px solid #dcdfe6; border-radius: 8px;
+    font-size: 14px; outline: none;
+  }
+  input:focus { border-color: #409eff; }
+  button {
+    width: 100%; margin-top: 24px; padding: 11px; border: 0; border-radius: 8px;
+    background: #409eff; color: #fff; font-size: 15px; cursor: pointer;
+  }
+  button:active { background: #337ecc; }
+  #msg { margin-top: 14px; font-size: 13px; color: #f56c6c; min-height: 18px; }
+  .note { margin-top: 22px; font-size: 12px; color: #bbb; border-top: 1px dashed #eee; padding-top: 12px; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>内部系统</h1>
+  <p class="sub">仅限管理员登录</p>
+  <label for="u">用户名</label>
+  <input id="u" autocomplete="off" placeholder="username">
+  <label for="p">密码</label>
+  <input id="p" type="password" placeholder="password">
+  <button id="btn">登 录</button>
+  <p id="msg"></p>
+  <p class="note">小课堂：前端代码也是代码。按 F12 → Sources，看看本页加载了哪些脚本。</p>
+</div>
+<!-- 别只盯着页面，去看看 /static/app.js 吧。 -->
+<script src="/static/app.js"></script>
+</body>
+</html>
