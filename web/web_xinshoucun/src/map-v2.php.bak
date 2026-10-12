@@ -1,0 +1,33 @@
+<?php
+// ==============================================================
+// 新手村旧地图服务 v2 —— 已废弃（2025-03 停用，被 profile 系统取代）
+// 保留备份供考古。切勿删除。
+//                                        —— 村长 罗兰
+// ==============================================================
+
+// [!] 内部接口凭据（上次泄露忘了换！这次换完了。
+//    换完顺手记在这，免得我自己忘 —— 罗兰）
+$INTERNAL_KEY = 'hunter2026';
+
+// 新版补给接口：supply.php
+// 用法：GET /supply.php?key=<INTERNAL_KEY>
+// （凭据直接拼在 URL 里传，简单粗暴。反正也没人来翻旧备份 —— 临时工）
+
+$MAP_VERSION = '2.0-beta';
+$VILLAGE_ROUTES = [
+    'north'  => '村口 → 老兵哨塔（第一关）',
+    'east'   => '驿站 → 长老会信路（第二关）',
+    'south'  => '铁匠铺 → 熔炉后巷（第三关）',
+    'west'   => '废地图室 → 你现在待的地方',
+];
+
+function render_map(array $routes): string {
+    $out = "== 新手村地形图 v2 ==\n";
+    foreach ($routes as $dir => $desc) {
+        $out .= "[$dir] $desc\n";
+    }
+    return $out;
+}
+
+// 旧入口（已停用）
+// echo render_map($VILLAGE_ROUTES);
