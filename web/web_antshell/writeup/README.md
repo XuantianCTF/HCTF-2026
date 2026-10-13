@@ -1,7 +1,7 @@
 # web_antshell —— 出题人文档
 
-> 玩家不可见本文档。Web 简单题：备份泄漏引出 webshell 源码，源码里写明
-> 「只认中国蚁剑」的流量特征校验，用蚁剑默认配置连接后读 `/flag`。
+> 玩家不可见本文档。Web 入门题：备份泄漏引出一句话木马，用 WebShell 管理工具
+>（题面推荐中国蚁剑）连接后读 `/flag`。
 
 ## 设计
 
@@ -12,53 +12,16 @@
 源码四件套：index.php / config.php / ant.php / robots.txt
         │ config.php 的 TODO 注释点名 ant.php
         ▼
-ant.php：POST 密码参数 ant，三重蚁剑流量特征校验，不过则 404
-        │ 蚁剑默认配置连接（URL /ant.php，密码 ant，类型 PHP，编码器 default）
+ant.php：经典一句话 eval($_POST['ant'])，连接密码 ant
+        │ 蚁剑「添加数据」（URL /ant.php，密码 ant，类型 PHP）
         ▼
 虚拟终端 cat /flag（或文件管理器看 /flag）→ hctf{...}
 ```
 
-考点：备份泄漏找到后门 + 认识蚁剑默认流量结构（前缀 `@ini_set("display_errors", ...)`、
-open_basedir 探测、`asoutput()` 回显）。对工具党是一道标准蚁剑连接题；
-源码在备份里白给，难点只在"看懂校验为什么只放行蚁剑"。
-
-## 「只认蚁剑」的依据（源码级核实）
-
-蚁剑 `source/core/php/index.js` 的 `complete()` 组装每次请求，`source/core/base.js`
-的默认编码器 `default(pwd, data)` 原样下发：`data[pwd] = data['_']`，即**整段 PHP 明文
-就是连接密码参数的值**，结构固定为：
-
-```php
-@ini_set("display_errors", "0");@set_time_limit(0);
-if(!function_exists("get_magic_quotes_gpc")){...}
-$opdir=@ini_get("open_basedir");if($opdir){...bypass...}
-function asenc($out){return $out;};          // default 解码器
-function asoutput(){...echo tag_s...tag_e...}
-ob_start();try{<模板代码>;}catch(Exception $e){echo "ERROR://"...}
-asoutput();die();
-```
-
-已核对 GitHub release `2.1.16` 与 master 该文件逐字节一致（2.1.15 同构），
-默认配置全版本满足校验。ant.php 的校验取其中三个稳定特征：
-
-| 校验 | 特征 | 来源 |
-|---|---|---|
-| 前缀 `strpos(...) === 0` | `@ini_set("display_errors"` | payload 固定开头 |
-| 包含 | `open_basedir` | bypass 探测代码 |
-| 包含 | `asoutput()` | 回显收尾函数 |
-
-其他工具为何全灭：哥斯拉/冰蝎为加密流，菜刀模板结构不同，直接 `ant=system(...)` 的
-裸 payload 更是连第一关都过不去——统一 404，与访问不存在路径的表现一致。
-
-**不校验 UA**：蚁剑请求 UA 是 `random-fake-useragent` 随机浏览器 UA
-（`modules/request.js`），无固定特征，不能作判定。
-
-## Flag 约定（HCTF-2026 全场统一）
-
-- 真 flag：`hctf{}` 包裹，**动态**——ret2shell 平台启动容器时注入 `FLAG` 环境变量，
-  `entrypoint.sh` 将其写入 `/flag`；未注入时回退默认 `hctf{AntSword_0n1y}`
-  （保持格式，静态部署可用）。
-- 本题无蜜罐 / 假 flag，不使用 `fflag{}`。
+入门教学点三个：备份泄漏找源码、认识一句话木马（GET 访问只报
+`Undefined array key` 警告、连接密码即参数名，POST 才干活）、WebShell 管理
+工具的基本操作（蚁剑添加数据 / 虚拟终端 / 文件管理器）。一句话不挑工具：
+菜刀、哥斯拉（PHP EVAL 模式）、直接 curl POST 均可行，蚁剑只是题面推荐路径。
 
 ## 行为表
 
@@ -66,8 +29,24 @@ asoutput();die();
 |---|---|
 | `GET /`、`GET /robots.txt` | 站点页面 / robots（公告与 Disallow 指向 /backup/） |
 | `GET /backup/antcloud_backup.zip` | 下载源码备份包（四文件，与部署一致） |
-| `GET /ant.php`（或任意非蚁剑 POST，含裸 `ant=system(...)`） | `404` + 站点风格 404 页 |
-| 蚁剑默认配置 POST `/ant.php`（密码 `ant`） | 放行 `eval`，蚁剑正常回显 |
+| `GET /ant.php` | 200 + `Warning: Undefined array key "ant"`（PHP 8 中 eval(null) 静默无操作；参数名即连接密码，报错即泄露） |
+| `POST /ant.php`（密码参数 `ant`，值为任意 PHP 代码） | `eval` 执行，蚁剑正常回显 |
+
+## 背景知识：蚁剑连上来时发了什么
+
+蚁剑默认配置（PHP 类型 / default 编码器）把**整段 PHP 代码明文**放进连接密码
+参数：固定头部 `@ini_set("display_errors", "0");@set_time_limit(0);`、
+open_basedir 探测、`asenc/asoutput` 回显函数、`try/catch` 包裹的模板代码，
+服务端 eval 后在随机 tag 之间回显数据（依据：蚁剑源码 source/core/php/index.js
+的 complete()，release 2.1.16 与 master 逐字节一致）。writeup/exp.py 即按此
+结构手搓请求，不开蚁剑复现完整利用链。
+
+## Flag 约定（HCTF-2026 全场统一）
+
+- 真 flag：`hctf{}` 包裹，**动态**——ret2shell 平台启动容器时注入 `FLAG` 环境变量，
+  `entrypoint.sh` 将其写入 `/flag`；未注入时回退默认 `hctf{AntSword_0n1y}`
+  （保持格式，静态部署可用）。
+- 本题无蜜罐 / 假 flag，不使用 `fflag{}`。
 
 ## 黑盒
 
@@ -96,5 +75,6 @@ docker run -d -p 8080:80 -e FLAG="hctf{xxx}" web_antshell
 neko 虚机（192.168.140.134）docker 实测：
 
 - `docker build` + `docker run -e FLAG='hctf{...}'` 通过；
-- 三态行为符合上表：普通 GET / 裸 POST 一律 404，蚁剑同构 payload 放行；
+- 行为符合上表：页面/robots/zip 正常，GET ant.php 仅报 Undefined array key 警告，
+  POST 任意 PHP 代码即执行（裸 payload 与蚁剑同构 payload 均放行）；
 - `writeup/exp.py`（手搓蚁剑默认流量）取回注入 flag，闭环。

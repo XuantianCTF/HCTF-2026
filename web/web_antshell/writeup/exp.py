@@ -47,7 +47,7 @@ def main():
 
     m = re.search(re.escape(tag_s) + r"(.*?)" + re.escape(tag_e), body, re.S)
     if not m:
-        sys.exit("no antSword-style response found - gate rejected, or wrong challenge?")
+        sys.exit("no antSword-style response found - wrong challenge, or payload failed?")
     print(m.group(1).strip())
 
 
