@@ -27,8 +27,7 @@ WebShell 管理工具的基本操作（添加数据 / 虚拟终端 / 文件管�
 | `GET /` | 200，回显 index.php 自身源码（highlight_file 高亮输出） |
 | `POST /`（密码参数 `HCTF`，值为任意 PHP 代码） | 源码回显 + `eval` 执行输出；前置的源码输出不影响管理工具提取执行结果 |
 
-## Flag 约定（HCTF-2026 全场统一）
-
+## Flag 约定
 - 真 flag：`hctf{}` 包裹，**动态**——ret2shell 平台启动容器时注入 `FLAG` 环境变量，
   `entrypoint.sh` 将其写入 `/flag`；未注入时回退默认 `hctf{W3lc0m3_T0_Websh3ll}`
   （保持格式，静态部署可用）。
